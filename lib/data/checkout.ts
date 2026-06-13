@@ -5,111 +5,154 @@ import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import { getAuthHeaders, getCartId, removeCartId } from "../cookies";
 
-const FREE_SHIPPING_THRESHOLD = 300000; // Rp 300.000
+export type AddressInput = {
+  email: string;
+  first_name: string;
+  last_name?: string;
+  phone?: string;
+  address_1: string;
+  city: string;
+  province?: string;
+  postal_code: string;
+};
 
-export type CheckoutState = { error?: string } | null;
+export type ShippingOption = {
+  id: string;
+  name: string;
+  amount: number | null;
+  description?: string;
+};
 
-export async function placeOrder(
-  _prev: CheckoutState,
-  formData: FormData
-): Promise<CheckoutState> {
+export type RatesResult = { options?: ShippingOption[]; error?: string };
+
+/**
+ * Saves the chosen address on the cart and returns the available shipping
+ * options. With the Biteship provider configured, these come back as live
+ * courier rates (JNE / J&T) calculated for the destination + cart items.
+ */
+export async function applyAddressAndGetRates(
+  input: AddressInput
+): Promise<RatesResult> {
   const cartId = await getCartId();
   if (!cartId) return { error: "Your cart is empty." };
-  const headers = await getAuthHeaders();
-
-  const get = (k: string) => String(formData.get(k) || "").trim();
-  const email = get("email");
-  const first_name = get("first_name");
-  const last_name = get("last_name");
-  const address_1 = get("address_1");
-  const city = get("city");
-  const postal_code = get("postal_code");
-  const phone = get("phone");
-  const province = get("province");
-
-  if (!email || !first_name || !address_1 || !city) {
-    return { error: "Please fill in all required fields." };
+  if (!input.email || !input.first_name || !input.address_1 || !input.city || !input.postal_code) {
+    return { error: "Please fill in name, email, address, city and postal code." };
   }
-
+  const headers = await getAuthHeaders();
   const address = {
-    first_name,
-    last_name,
-    address_1,
-    city,
-    postal_code,
-    province,
-    phone,
+    first_name: input.first_name,
+    last_name: input.last_name ?? "",
+    phone: input.phone ?? "",
+    address_1: input.address_1,
+    city: input.city,
+    province: input.province ?? "",
+    postal_code: input.postal_code,
     country_code: "id",
   };
 
   try {
-    // 1. Email + addresses
     await sdk.store.cart.update(
       cartId,
-      { email, shipping_address: address, billing_address: address },
+      { email: input.email, shipping_address: address, billing_address: address },
       {},
       headers as any
     );
 
-    // 2. Pick a shipping option (free over threshold, else standard)
     const { shipping_options } = await sdk.store.fulfillment.listCartOptions(
       { cart_id: cartId } as any,
       headers as any
     );
+
     if (!shipping_options?.length) {
-      return { error: "No shipping options available for your address." };
+      return { error: "No shipping options available for this address." };
     }
 
-    const { cart: current } = await sdk.store.cart.retrieve(
-      cartId,
-      { fields: "id,item_total,subtotal" } as any,
-      headers as any
+    // Flat options carry an `amount`; "calculated" options (Biteship couriers)
+    // must be priced per-option via the calculate endpoint. Degrade gracefully
+    // so one failing courier doesn't hide the others.
+    const errors: string[] = [];
+    const priced = await Promise.all(
+      (shipping_options as any[]).map(async (o) => {
+        const base: ShippingOption = {
+          id: o.id,
+          name: o.name,
+          amount: null,
+          description: o.type?.description,
+        };
+        if (o.price_type !== "calculated" && o.amount != null) {
+          return { ...base, amount: o.amount };
+        }
+        try {
+          const res: any = await sdk.store.fulfillment.calculate(
+            o.id,
+            { cart_id: cartId } as any,
+            {},
+            headers as any
+          );
+          const so = res?.shipping_option ?? res;
+          base.amount =
+            so?.calculated_price?.calculated_amount ?? so?.amount ?? null;
+        } catch (e: any) {
+          errors.push(e?.message || `${o.name} unavailable`);
+        }
+        return base;
+      })
     );
-    const subtotal = (current as any).item_total ?? (current as any).subtotal ?? 0;
 
-    const free = shipping_options.find((o: any) => /free/i.test(o.name));
-    const standard = shipping_options.find((o: any) => /standard/i.test(o.name));
-    const chosen =
-      subtotal >= FREE_SHIPPING_THRESHOLD && free
-        ? free
-        : standard ?? shipping_options[0];
+    const options = priced.filter((o) => o.amount != null);
+    if (!options.length) {
+      // The provider error is masked by Medusa as a generic 500; keep the
+      // customer-facing message neutral (common causes: unrecognized postal
+      // code, or the courier account needs a balance top-up).
+      if (errors.length) console.error("Shipping rate errors:", errors);
+      return {
+        error:
+          "Couldn't calculate shipping for this address. Please double-check your postal code and try again.",
+      };
+    }
+    return { options };
+  } catch (e: any) {
+    return { error: e?.message || "Could not calculate shipping for this address." };
+  }
+}
 
+/** Adds the chosen shipping method, initiates payment, and completes the order. */
+export async function placeOrder(optionId: string): Promise<{ error?: string }> {
+  const cartId = await getCartId();
+  if (!cartId) return { error: "Your cart is empty." };
+  if (!optionId) return { error: "Please choose a shipping method." };
+  const headers = await getAuthHeaders();
+
+  try {
     await sdk.store.cart.addShippingMethod(
       cartId,
-      { option_id: chosen.id },
+      { option_id: optionId },
       {},
       headers as any
     );
 
-    // 3. Initiate payment session (manual / system provider)
-    const { cart: cartForPayment } = await sdk.store.cart.retrieve(
+    const { cart } = await sdk.store.cart.retrieve(
       cartId,
       { fields: "*payment_collection" } as any,
       headers as any
     );
     await sdk.store.payment.initiatePaymentSession(
-      cartForPayment as any,
+      cart as any,
       { provider_id: "pp_system_default" },
       {},
       headers as any
     );
 
-    // 4. Complete the cart -> order
     const result = await sdk.store.cart.complete(cartId, {}, headers as any);
-
     if (result.type === "order") {
       await removeCartId();
       revalidatePath("/", "layout");
       redirect(`/order/${result.order.id}`);
     }
-
     return {
-      error:
-        (result as any).error?.message ||
-        "Could not complete the order. Please try again.",
+      error: (result as any).error?.message || "Could not complete the order.",
     };
   } catch (e: any) {
-    // redirect() throws internally — re-throw so Next can handle it.
     if (e?.digest?.startsWith?.("NEXT_REDIRECT")) throw e;
     return { error: e?.message || "Checkout failed. Please try again." };
   }

@@ -24,10 +24,16 @@ export default async function AccountPage() {
         />
       </div>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href="/account/addresses"
+          className="rounded-md bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-orange"
+        >
+          Address book
+        </Link>
         <Link
           href="/shop"
-          className="rounded-md bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-orange"
+          className="rounded-md border border-line px-5 py-3 text-sm font-bold text-ink-soft hover:border-ink"
         >
           Continue shopping
         </Link>

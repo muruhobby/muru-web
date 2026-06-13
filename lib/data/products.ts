@@ -32,3 +32,28 @@ export async function getProductByHandle(handle: string) {
   return products[0] ?? null;
 }
 
+/** Categories that actually have products, sorted by size (skips empty ones). */
+export async function listCategories() {
+  const { product_categories } = await sdk.store.category.list(
+    { fields: "id,name,handle,products.id", limit: 100 } as any,
+    { next: { revalidate: 300 } } as any
+  );
+  return (product_categories ?? [])
+    .map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      handle: c.handle,
+      count: c.products?.length ?? 0,
+    }))
+    .filter((c: any) => c.count > 0)
+    .sort((a: any, b: any) => b.count - a.count);
+}
+
+export async function getCategoryByHandle(handle: string) {
+  const { product_categories } = await sdk.store.category.list(
+    { handle, fields: "id,name,handle" } as any,
+    { next: { revalidate: 300 } } as any
+  );
+  return product_categories?.[0] ?? null;
+}
+

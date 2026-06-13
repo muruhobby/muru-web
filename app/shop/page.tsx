@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { listCategories, listProducts } from "@/lib/data/products";
+import { listProducts } from "@/lib/data/products";
+import { listCollections } from "@/lib/data/collections";
 import { ProductCard } from "@/components/product-card";
 
 export default async function ShopPage() {
-  const [products, categories] = await Promise.all([
+  const [products, collections] = await Promise.all([
     listProducts({ limit: 50 }),
-    listCategories(),
+    listCollections(),
   ]);
 
   return (
@@ -17,13 +18,13 @@ export default async function ShopPage() {
         <span className="rounded-full bg-orange px-4 py-1.5 text-sm font-semibold text-white">
           All
         </span>
-        {categories.map((c: any) => (
+        {collections.map((c: any) => (
           <Link
             key={c.id}
-            href={`/category/${c.handle}`}
+            href={`/collection/${c.handle}`}
             className="rounded-full border border-line px-4 py-1.5 text-sm font-semibold text-ink-soft hover:border-ink"
           >
-            {c.name}
+            {c.title}
           </Link>
         ))}
       </div>

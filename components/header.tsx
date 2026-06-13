@@ -1,19 +1,18 @@
 import Link from "next/link";
 import { getCart } from "@/lib/data/cart";
 import { getCustomer } from "@/lib/data/customer";
-
-const NAV = [
-  { label: "Blokees", href: "/category/blokees" },
-  { label: "Kamen Rider", href: "/category/kamen-rider" },
-  { label: "Ultraman", href: "/category/ultraman" },
-  { label: "Pokémon", href: "/category/pokmon-tcg" },
-  { label: "Zoids", href: "/category/zoids" },
-];
+import { listCollections } from "@/lib/data/collections";
 
 export async function Header() {
-  const [cart, customer] = await Promise.all([getCart(), getCustomer()]);
+  const [cart, customer, collections] = await Promise.all([
+    getCart(),
+    getCustomer(),
+    listCollections(),
+  ]);
   const count =
     cart?.items?.reduce((n: number, i: any) => n + (i.quantity ?? 0), 0) ?? 0;
+
+  const nav = collections.slice(0, 5);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur">
@@ -25,13 +24,13 @@ export async function Header() {
         </Link>
 
         <nav className="ml-4 hidden items-center gap-6 lg:flex">
-          {NAV.map((n) => (
+          {nav.map((c: any) => (
             <Link
-              key={n.href}
-              href={n.href}
+              key={c.id}
+              href={`/collection/${c.handle}`}
               className="text-sm font-semibold text-ink-soft transition-colors hover:text-orange"
             >
-              {n.label}
+              {c.title}
             </Link>
           ))}
         </nav>

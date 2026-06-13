@@ -69,7 +69,6 @@ export default async function ProductPage({
 
           <div className="mt-8 flex gap-6 border-t border-line pt-6 text-sm text-muted">
             <span>✓ 100% authentic</span>
-            <span>✓ Bisa COD</span>
             <span>✓ Fast dispatch</span>
           </div>
         </div>

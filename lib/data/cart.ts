@@ -62,7 +62,7 @@ export async function updateLineItem(lineId: string, quantity: number) {
   if (!id) return;
   const headers = await getAuthHeaders();
   if (quantity <= 0) {
-    await sdk.store.cart.deleteLineItem(id, lineId, headers as any);
+    await sdk.store.cart.deleteLineItem(id, lineId, {}, headers as any);
   } else {
     await sdk.store.cart.updateLineItem(
       id,
@@ -80,7 +80,7 @@ export async function removeLineItem(lineId: string) {
   const id = await getCartId();
   if (!id) return;
   const headers = await getAuthHeaders();
-  await sdk.store.cart.deleteLineItem(id, lineId, headers as any);
+  await sdk.store.cart.deleteLineItem(id, lineId, {}, headers as any);
   revalidatePath("/cart");
   revalidatePath("/", "layout");
 }

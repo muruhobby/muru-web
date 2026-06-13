@@ -6,6 +6,7 @@ const PRODUCT_FIELDS =
 
 export async function listProducts(opts?: {
   categoryId?: string;
+  collectionId?: string;
   limit?: number;
 }) {
   const region = await getRegion();
@@ -15,6 +16,7 @@ export async function listProducts(opts?: {
       fields: PRODUCT_FIELDS,
       limit: opts?.limit ?? 20,
       ...(opts?.categoryId ? { category_id: [opts.categoryId] } : {}),
+      ...(opts?.collectionId ? { collection_id: [opts.collectionId] } : {}),
     } as any,
     { next: { revalidate: 60 } } as any
   );
@@ -30,10 +32,3 @@ export async function getProductByHandle(handle: string) {
   return products[0] ?? null;
 }
 
-export async function listCategories() {
-  const { product_categories } = await sdk.store.category.list(
-    { fields: "id,name,handle", limit: 20 } as any,
-    { next: { revalidate: 3600 } } as any
-  );
-  return product_categories;
-}

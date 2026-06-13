@@ -1,19 +1,20 @@
 import Link from "next/link";
-import { listCategories, listProducts } from "@/lib/data/products";
+import { listProducts } from "@/lib/data/products";
+import { listCollections } from "@/lib/data/collections";
 import { ProductCard } from "@/components/product-card";
 import { formatIDR, getProductMeta, getVariantPrice } from "@/lib/util";
 
 const FEATURES = [
   { title: "Fast dispatch", body: "Orders before 2PM ship same day. Nationwide in 2–5 days." },
   { title: "100% authentic", body: "Factory sealed, sourced directly from official distributors." },
-  { title: "Bisa COD", body: "Cash on delivery available across major Indonesian cities." },
   { title: "Builder community", body: "2,000+ collectors on Discord sharing builds and reviews." },
+  { title: "Placeholder", body: "Placeholder text" }
 ];
 
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
+  const [products, collections] = await Promise.all([
     listProducts({ limit: 12 }),
-    listCategories(),
+    listCollections(),
   ]);
 
   const hero = products[0];
@@ -107,13 +108,13 @@ export default async function HomePage() {
           >
             All
           </Link>
-          {categories.map((c: any) => (
+          {collections.map((c: any) => (
             <Link
               key={c.id}
-              href={`/category/${c.handle}`}
+              href={`/collection/${c.handle}`}
               className="shrink-0 rounded-full border border-line px-4 py-1.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink"
             >
-              {c.name}
+              {c.title}
             </Link>
           ))}
         </div>

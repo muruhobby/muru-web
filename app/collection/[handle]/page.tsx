@@ -1,27 +1,31 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { listCategories, listProducts } from "@/lib/data/products";
+import { getCollectionByHandle } from "@/lib/data/collections";
+import { listProducts } from "@/lib/data/products";
 import { ProductCard } from "@/components/product-card";
 
-export default async function CategoryPage({
+export default async function CollectionPage({
   params,
 }: {
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
-  const categories = await listCategories();
-  const category = categories.find((c: any) => c.handle === handle);
-  if (!category) notFound();
+  const collection = await getCollectionByHandle(handle);
+  if (!collection) notFound();
 
-  const products = await listProducts({ categoryId: category.id, limit: 50 });
+  const products = await listProducts({
+    collectionId: collection.id,
+    limit: 50,
+  });
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-12">
       <Link href="/shop" className="eyebrow text-muted hover:text-orange">
         ← All products
       </Link>
-      <h1 className="mt-3 text-3xl font-extrabold tracking-tight">
-        {category.name}
+      <p className="mt-3 eyebrow text-orange">Collection</p>
+      <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
+        {collection.title}
       </h1>
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -31,7 +35,10 @@ export default async function CategoryPage({
       </div>
 
       {products.length === 0 && (
-        <p className="mt-10 text-muted">No products in this category yet.</p>
+        <p className="mt-10 text-muted">
+          No products in this collection yet. Assign products to it in Medusa
+          admin.
+        </p>
       )}
     </div>
   );

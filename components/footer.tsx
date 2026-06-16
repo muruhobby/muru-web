@@ -14,7 +14,7 @@ export async function Footer() {
               No collections yet — add them in Medusa admin.
             </span>
           )}
-          {collections.map((c: any) => (
+          {collections.map((c) => (
             <Link
               key={c.id}
               href={`/collection/${c.handle}`}

@@ -10,7 +10,7 @@ export async function Header() {
     listCollections(),
   ]);
   const count =
-    cart?.items?.reduce((n: number, i: any) => n + (i.quantity ?? 0), 0) ?? 0;
+    cart?.items?.reduce((n, i) => n + (i.quantity ?? 0), 0) ?? 0;
 
   const nav = collections.slice(0, 5);
 
@@ -24,7 +24,7 @@ export async function Header() {
         </Link>
 
         <nav className="ml-4 hidden items-center gap-6 lg:flex">
-          {nav.map((c: any) => (
+          {nav.map((c) => (
             <Link
               key={c.id}
               href={`/collection/${c.handle}`}

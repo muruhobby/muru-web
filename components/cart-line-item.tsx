@@ -3,8 +3,9 @@
 import { useTransition } from "react";
 import { removeLineItem, updateLineItem } from "@/lib/data/cart";
 import { formatIDR } from "@/lib/util";
+import type { StoreCartLineItem } from "@/lib/types";
 
-export function CartLineItem({ item }: { item: any }) {
+export function CartLineItem({ item }: { item: StoreCartLineItem }) {
   const [pending, startTransition] = useTransition();
   const emoji = (item.product?.metadata?.emoji as string) || "📦";
 

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import { getAuthHeaders, getCartId, removeCartId } from "../cookies";
+import { getErrorMessage } from "../util";
+import type { StoreCartShippingOption, StoreOrder } from "../types";
 
 export type AddressInput = {
   email: string;
@@ -55,12 +57,12 @@ export async function applyAddressAndGetRates(
       cartId,
       { email: input.email, shipping_address: address, billing_address: address },
       {},
-      headers as any
+      headers
     );
 
     const { shipping_options } = await sdk.store.fulfillment.listCartOptions(
-      { cart_id: cartId } as any,
-      headers as any
+      { cart_id: cartId },
+      headers
     );
 
     if (!shipping_options?.length) {
@@ -72,7 +74,7 @@ export async function applyAddressAndGetRates(
     // so one failing courier doesn't hide the others.
     const errors: string[] = [];
     const priced = await Promise.all(
-      (shipping_options as any[]).map(async (o) => {
+      shipping_options.map(async (o: StoreCartShippingOption) => {
         const base: ShippingOption = {
           id: o.id,
           name: o.name,
@@ -83,17 +85,18 @@ export async function applyAddressAndGetRates(
           return { ...base, amount: o.amount };
         }
         try {
-          const res: any = await sdk.store.fulfillment.calculate(
+          const { shipping_option } = await sdk.store.fulfillment.calculate(
             o.id,
-            { cart_id: cartId } as any,
+            { cart_id: cartId },
             {},
-            headers as any
+            headers
           );
-          const so = res?.shipping_option ?? res;
           base.amount =
-            so?.calculated_price?.calculated_amount ?? so?.amount ?? null;
-        } catch (e: any) {
-          errors.push(e?.message || `${o.name} unavailable`);
+            shipping_option?.calculated_price?.calculated_amount ??
+            shipping_option?.amount ??
+            null;
+        } catch (e: unknown) {
+          errors.push(getErrorMessage(e, `${o.name} unavailable`));
         }
         return base;
       })
@@ -111,8 +114,10 @@ export async function applyAddressAndGetRates(
       };
     }
     return { options };
-  } catch (e: any) {
-    return { error: e?.message || "Could not calculate shipping for this address." };
+  } catch (e: unknown) {
+    return {
+      error: getErrorMessage(e, "Could not calculate shipping for this address."),
+    };
   }
 }
 
@@ -128,37 +133,46 @@ export async function placeOrder(optionId: string): Promise<{ error?: string }> 
       cartId,
       { option_id: optionId },
       {},
-      headers as any
+      headers
     );
 
     const { cart } = await sdk.store.cart.retrieve(
       cartId,
-      { fields: "*payment_collection" } as any,
-      headers as any
+      { fields: "*payment_collection" },
+      headers
     );
     await sdk.store.payment.initiatePaymentSession(
-      cart as any,
+      cart,
       { provider_id: "pp_system_default" },
       {},
-      headers as any
+      headers
     );
 
-    const result = await sdk.store.cart.complete(cartId, {}, headers as any);
+    const result = await sdk.store.cart.complete(cartId, {}, headers);
     if (result.type === "order") {
       await removeCartId();
       revalidatePath("/", "layout");
       redirect(`/order/${result.order.id}`);
     }
     return {
-      error: (result as any).error?.message || "Could not complete the order.",
+      error: result.error?.message || "Could not complete the order.",
     };
-  } catch (e: any) {
-    if (e?.digest?.startsWith?.("NEXT_REDIRECT")) throw e;
-    return { error: e?.message || "Checkout failed. Please try again." };
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message?.includes("NEXT_REDIRECT")) throw e;
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "digest" in e &&
+      typeof (e as { digest?: unknown }).digest === "string" &&
+      (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+    ) {
+      throw e;
+    }
+    return { error: getErrorMessage(e, "Checkout failed. Please try again.") };
   }
 }
 
-export async function getOrder(orderId: string) {
+export async function getOrder(orderId: string): Promise<StoreOrder | null> {
   const headers = await getAuthHeaders();
   try {
     const { order } = await sdk.store.order.retrieve(
@@ -166,8 +180,8 @@ export async function getOrder(orderId: string) {
       {
         fields:
           "*items,*shipping_address,*shipping_methods,+email,+total,+currency_code,+display_id",
-      } as any,
-      headers as any
+      },
+      headers
     );
     return order;
   } catch {

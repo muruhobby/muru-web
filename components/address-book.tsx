@@ -3,8 +3,13 @@
 import { useState, useTransition } from "react";
 import { deleteAddress } from "@/lib/data/addresses";
 import { AddressForm } from "./address-form";
+import type { StoreCustomerAddress } from "@/lib/types";
 
-export function AddressBook({ addresses }: { addresses: any[] }) {
+export function AddressBook({
+  addresses,
+}: {
+  addresses: StoreCustomerAddress[];
+}) {
   const [editing, setEditing] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [pending, startTransition] = useTransition();

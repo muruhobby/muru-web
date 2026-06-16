@@ -4,15 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { AddToCartButton } from "./add-to-cart-button";
 import { formatIDR } from "@/lib/util";
+import type { StoreProductVariant } from "@/lib/types";
 
-type Variant = {
-  id: string;
-  title?: string | null;
-  sku?: string | null;
-  calculated_price?: { calculated_amount?: number } | null;
-};
-
-export function ProductPurchase({ variants }: { variants: Variant[] }) {
+export function ProductPurchase({
+  variants,
+}: {
+  variants: StoreProductVariant[];
+}) {
   const [selectedId, setSelectedId] = useState(variants[0]?.id ?? null);
   const selected = variants.find((v) => v.id === selectedId) ?? variants[0];
   const price = selected?.calculated_price?.calculated_amount ?? null;

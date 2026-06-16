@@ -1,17 +1,20 @@
 import { sdk } from "../medusa";
+import type { StoreCollection } from "../types";
 
-export async function listCollections() {
-  const { collections } = await sdk.store.collection.list(
-    { fields: "id,title,handle", limit: 50 } as any,
-    { next: { revalidate: 3600 } } as any
-  );
+export async function listCollections(): Promise<StoreCollection[]> {
+  const { collections } = await sdk.store.collection.list({
+    fields: "id,title,handle",
+    limit: 50,
+  });
   return collections;
 }
 
-export async function getCollectionByHandle(handle: string) {
-  const { collections } = await sdk.store.collection.list(
-    { handle, fields: "id,title,handle" } as any,
-    { next: { revalidate: 3600 } } as any
-  );
+export async function getCollectionByHandle(
+  handle: string
+): Promise<StoreCollection | null> {
+  const { collections } = await sdk.store.collection.list({
+    handle,
+    fields: "id,title,handle",
+  });
   return collections[0] ?? null;
 }

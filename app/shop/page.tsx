@@ -17,7 +17,7 @@ export default async function ShopPage() {
         <span className="rounded-full bg-orange px-4 py-1.5 text-sm font-semibold text-white">
           All
         </span>
-        {categories.map((c: any) => (
+        {categories.map((c) => (
           <Link
             key={c.id}
             href={`/category/${c.handle}`}
@@ -29,7 +29,7 @@ export default async function ShopPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {products.map((p: any) => (
+        {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
       </div>

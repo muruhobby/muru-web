@@ -108,7 +108,7 @@ export default async function HomePage() {
           >
             All
           </Link>
-          {collections.map((c: any) => (
+          {collections.map((c) => (
             <Link
               key={c.id}
               href={`/collection/${c.handle}`}
@@ -139,14 +139,14 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {grid.map((p: any) => (
+            {grid.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
 
           {wide.length > 0 && (
             <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {wide.map((p: any) => (
+              {wide.map((p) => (
                 <ProductCard key={p.id} product={p} wide />
               ))}
             </div>

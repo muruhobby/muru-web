@@ -7,6 +7,7 @@ import {
   type ShippingOption,
 } from "@/lib/data/checkout";
 import { formatIDR } from "@/lib/util";
+import type { StoreCustomerAddress } from "@/lib/types";
 
 type Addr = {
   first_name: string;
@@ -33,7 +34,7 @@ export function CheckoutClient({
   defaultEmail,
   subtotal,
 }: {
-  addresses: any[];
+  addresses: StoreCustomerAddress[];
   defaultEmail: string;
   subtotal: number;
 }) {
@@ -52,7 +53,7 @@ export function CheckoutClient({
   const chosen = options?.find((o) => o.id === optionId) ?? null;
   const shippingCost = chosen?.amount ?? 0;
 
-  function selectAddress(a: any) {
+  function selectAddress(a: StoreCustomerAddress) {
     setSelectedAddressId(a.id);
     setAddr(pick(a));
     setOptions(null);
@@ -208,7 +209,7 @@ export function CheckoutClient({
   );
 }
 
-function pick(a: any): Addr {
+function pick(a: StoreCustomerAddress): Addr {
   return {
     first_name: a.first_name ?? "",
     last_name: a.last_name ?? "",

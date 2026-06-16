@@ -12,8 +12,8 @@ export default async function OrderConfirmationPage({
   const order = await getOrder(id);
   if (!order) notFound();
 
-  const items = (order as any).items ?? [];
-  const addr = (order as any).shipping_address;
+  const items = order.items ?? [];
+  const addr = order.shipping_address;
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-16">
@@ -25,19 +25,19 @@ export default async function OrderConfirmationPage({
         <p className="mt-2 text-ink-soft">
           Thanks! Your order{" "}
           <span className="font-bold text-ink">
-            #{(order as any).display_id ?? id.slice(-8)}
+            #{order.display_id ?? id.slice(-8)}
           </span>{" "}
           is being prepared.
         </p>
         <p className="mt-1 text-sm text-muted">
-          A confirmation was sent to {(order as any).email}.
+          A confirmation was sent to {order.email}.
         </p>
       </div>
 
       <div className="mt-6 rounded-xl border border-line bg-white p-6">
         <h2 className="eyebrow text-orange">Items</h2>
         <div className="mt-3 divide-y divide-line">
-          {items.map((i: any) => (
+          {items.map((i) => (
             <div key={i.id} className="flex items-center gap-3 py-3">
               <span className="grid h-10 w-10 place-items-center rounded border border-line bg-paper text-xl">
                 {(i.product?.metadata?.emoji as string) || "📦"}
@@ -56,7 +56,7 @@ export default async function OrderConfirmationPage({
         </div>
         <div className="mt-4 flex justify-between border-t border-line pt-4 text-lg font-extrabold">
           <span>Total</span>
-          <span>{formatIDR((order as any).total)}</span>
+          <span>{formatIDR(order.total)}</span>
         </div>
       </div>
 

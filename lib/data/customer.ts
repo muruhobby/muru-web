@@ -8,12 +8,14 @@ import {
   removeAuthToken,
   setAuthToken,
 } from "../cookies";
+import { getErrorMessage } from "../util";
+import type { StoreCustomer } from "../types";
 
-export async function getCustomer() {
+export async function getCustomer(): Promise<StoreCustomer | null> {
   const headers = await getAuthHeaders();
   if (!("authorization" in headers)) return null;
   try {
-    const { customer } = await sdk.store.customer.retrieve({}, headers as any);
+    const { customer } = await sdk.store.customer.retrieve({}, headers);
     return customer;
   } catch {
     return null;
@@ -44,7 +46,7 @@ export async function signup(
     await sdk.store.customer.create(
       { email, first_name, last_name },
       {},
-      { authorization: `Bearer ${token}` } as any
+      { authorization: `Bearer ${token}` }
     );
 
     // 3. Log in to obtain a token scoped to the new customer, persist it.
@@ -56,8 +58,8 @@ export async function signup(
       return { error: "Unexpected auth response. Try logging in." };
     }
     await setAuthToken(loginToken);
-  } catch (e: any) {
-    const msg: string = e?.message || "Could not create account.";
+  } catch (e: unknown) {
+    const msg = getErrorMessage(e, "Could not create account.");
     if (msg.toLowerCase().includes("already")) {
       return { error: "An account with this email already exists." };
     }

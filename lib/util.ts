@@ -7,6 +7,15 @@ export function formatIDR(amount: number | null | undefined): string {
   }).format(amount ?? 0);
 }
 
+export function getErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong."
+): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return fallback;
+}
+
 export type Badge = "HOT" | "NEW" | "LIMITED";
 
 export function getProductMeta(product: { metadata?: Record<string, unknown> | null }) {
@@ -18,8 +27,9 @@ export function getProductMeta(product: { metadata?: Record<string, unknown> | n
   };
 }
 
-export function getVariantPrice(product: any): number | null {
-  const variant = product?.variants?.[0];
-  const amount = variant?.calculated_price?.calculated_amount;
+import type { StoreProduct } from "./types";
+
+export function getVariantPrice(product: StoreProduct): number | null {
+  const amount = product.variants?.[0]?.calculated_price?.calculated_amount;
   return typeof amount === "number" ? amount : null;
 }

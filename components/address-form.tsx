@@ -6,6 +6,7 @@ import {
   updateAddress,
   type AddressState,
 } from "@/lib/data/addresses";
+import type { StoreCustomerAddress } from "@/lib/types";
 
 export function AddressForm({
   mode,
@@ -13,7 +14,7 @@ export function AddressForm({
   onDone,
 }: {
   mode: "create" | "edit";
-  address?: any;
+  address?: StoreCustomerAddress;
   onDone: () => void;
 }) {
   const action = mode === "edit" ? updateAddress : createAddress;
@@ -78,7 +79,7 @@ function Field({
 }: {
   name: string;
   label: string;
-  defaultValue?: string;
+  defaultValue?: string | null;
   required?: boolean;
 }) {
   return (

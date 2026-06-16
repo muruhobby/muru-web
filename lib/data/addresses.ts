@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import { getAuthHeaders } from "../cookies";
+import { getErrorMessage } from "../util";
+import type { StoreCustomerAddress } from "../types";
 
-export async function getAddresses() {
+export async function getAddresses(): Promise<StoreCustomerAddress[]> {
   const headers = await getAuthHeaders();
   if (!("authorization" in headers)) return [];
   try {
     const { addresses } = await sdk.store.customer.listAddress(
-      { limit: 50 } as any,
-      headers as any
+      { limit: 50 },
+      headers
     );
     return addresses ?? [];
   } catch {
@@ -47,9 +49,9 @@ export async function createAddress(
     return { error: "Name, address, city and postal code are required." };
   }
   try {
-    await sdk.store.customer.createAddress(body as any, {}, headers as any);
-  } catch (e: any) {
-    return { error: e?.message || "Could not save address." };
+    await sdk.store.customer.createAddress(body, {}, headers);
+  } catch (e: unknown) {
+    return { error: getErrorMessage(e, "Could not save address.") };
   }
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
@@ -67,14 +69,9 @@ export async function updateAddress(
   if (!addressId) return { error: "Missing address id." };
   const body = readAddress(formData);
   try {
-    await sdk.store.customer.updateAddress(
-      addressId,
-      body as any,
-      {},
-      headers as any
-    );
-  } catch (e: any) {
-    return { error: e?.message || "Could not update address." };
+    await sdk.store.customer.updateAddress(addressId, body, {}, headers);
+  } catch (e: unknown) {
+    return { error: getErrorMessage(e, "Could not update address.") };
   }
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
@@ -84,7 +81,7 @@ export async function updateAddress(
 export async function deleteAddress(addressId: string) {
   const headers = await getAuthHeaders();
   if (!("authorization" in headers)) return;
-  await sdk.store.customer.deleteAddress(addressId, headers as any);
+  await sdk.store.customer.deleteAddress(addressId, headers);
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
 }

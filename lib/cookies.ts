@@ -10,9 +10,7 @@ const baseOpts = {
   secure: process.env.NODE_ENV === "production",
 };
 
-export async function getAuthHeaders(): Promise<
-  { authorization: string } | Record<string, never>
-> {
+export async function getAuthHeaders(): Promise<Record<string, string>> {
   const token = (await nextCookies()).get("_medusa_jwt")?.value;
   return token ? { authorization: `Bearer ${token}` } : {};
 }

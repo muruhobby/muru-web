@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatIDR, getProductMeta, getVariantPrice } from "@/lib/util";
+import type { StoreProduct } from "@/lib/types";
 import { AddToCartButton } from "./add-to-cart-button";
 
 const BADGE_STYLES: Record<string, string> = {
@@ -12,7 +13,7 @@ export function ProductCard({
   product,
   wide = false,
 }: {
-  product: any;
+  product: StoreProduct;
   wide?: boolean;
 }) {
   const { badge, categoryLabel, emoji } = getProductMeta(product);

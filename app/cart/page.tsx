@@ -25,7 +25,7 @@ export default async function CartPage() {
     );
   }
 
-  const subtotal = (cart as any).item_total ?? 0;
+  const subtotal = cart?.item_total ?? 0;
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
@@ -34,10 +34,10 @@ export default async function CartPage() {
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_320px]">
         <div className="divide-y divide-line border-y border-line">
           {items
-            .sort((a: any, b: any) =>
-              (a.created_at ?? "").localeCompare(b.created_at ?? "")
+            .sort((a, b) =>
+              String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""))
             )
-            .map((item: any) => (
+            .map((item) => (
               <CartLineItem key={item.id} item={item} />
             ))}
         </div>

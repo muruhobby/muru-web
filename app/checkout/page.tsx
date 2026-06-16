@@ -15,7 +15,7 @@ export default async function CheckoutPage() {
   const items = cart?.items ?? [];
   if (!items.length) redirect("/cart");
 
-  const subtotal = (cart as any).item_total ?? 0;
+  const subtotal = cart?.item_total ?? 0;
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
@@ -48,7 +48,7 @@ export default async function CheckoutPage() {
         <aside className="h-fit rounded-xl border border-line bg-white p-6">
           <h2 className="font-bold">Your order</h2>
           <div className="mt-4 divide-y divide-line">
-            {items.map((i: any) => (
+            {items.map((i) => (
               <div key={i.id} className="flex items-center gap-3 py-3">
                 <span className="grid h-10 w-10 place-items-center rounded border border-line bg-paper text-xl">
                   {(i.product?.metadata?.emoji as string) || "📦"}

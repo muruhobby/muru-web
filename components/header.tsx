@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Form from "next/form";
 import { getCart } from "@/lib/data/cart";
 import { getCustomer } from "@/lib/data/customer";
 import { listCollections } from "@/lib/data/collections";
@@ -35,7 +36,31 @@ export async function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        <Form
+          action="/search"
+          className="relative ml-auto hidden w-full max-w-xs sm:block"
+        >
+          <input
+            type="search"
+            name="q"
+            placeholder="Search products…"
+            aria-label="Search products"
+            className="w-full rounded-md border border-line bg-paper py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
+          />
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+          >
+            <circle cx="9" cy="9" r="6" />
+            <path d="m18 18-4.5-4.5" strokeLinecap="round" />
+          </svg>
+        </Form>
+
+        <div className="ml-auto flex items-center gap-3 sm:ml-0">
           <Link
             href="/account"
             className="hidden text-sm font-semibold text-ink-soft transition-colors hover:text-orange sm:block"

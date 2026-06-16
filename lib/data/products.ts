@@ -24,6 +24,7 @@ export const listProducts = unstable_cache(
   async function listProducts(opts?: {
     categoryId?: string;
     collectionId?: string;
+    q?: string;
     limit?: number;
   }): Promise<StoreProduct[]> {
     const region = await getRegion();
@@ -34,6 +35,7 @@ export const listProducts = unstable_cache(
     };
     if (opts?.categoryId) query.category_id = [opts.categoryId];
     if (opts?.collectionId) query.collection_id = [opts.collectionId];
+    if (opts?.q) query.q = opts.q;
 
     const { products } = await sdk.store.product.list(query);
     return products;

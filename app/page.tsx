@@ -1,8 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import { listProducts } from "@/lib/data/products";
 import { listCollections } from "@/lib/data/collections";
 import { ProductCard } from "@/components/product-card";
-import { formatIDR, getProductMeta, getVariantPrice } from "@/lib/util";
+import {
+  formatIDR,
+  getProductImage,
+  getProductMeta,
+  getVariantPrice,
+} from "@/lib/util";
 
 const FEATURES = [
   { title: "Fast dispatch", body: "Orders before 2PM ship same day. Nationwide in 2–5 days." },
@@ -20,6 +26,7 @@ export default async function HomePage() {
   const hero = products[0];
   const heroMeta = hero ? getProductMeta(hero) : null;
   const heroPrice = hero ? getVariantPrice(hero) : null;
+  const heroImage = hero ? getProductImage(hero) : null;
 
   const grid = products.slice(0, 4);
   const wide = products.slice(4, 6);
@@ -80,9 +87,20 @@ export default async function HomePage() {
                 <div className="flex flex-col items-center">
                   <Link
                     href={`/product/${hero.handle}`}
-                    className="grid h-64 w-64 place-items-center rounded-2xl border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
+                    className="relative grid h-64 w-64 place-items-center overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
                   >
-                    <span className="text-8xl">{heroMeta?.emoji}</span>
+                    {heroImage ? (
+                      <Image
+                        src={heroImage}
+                        alt={hero.title ?? ""}
+                        fill
+                        sizes="256px"
+                        priority
+                        className="object-contain p-5"
+                      />
+                    ) : (
+                      <span className="text-8xl">{heroMeta?.emoji}</span>
+                    )}
                   </Link>
                   <p className="eyebrow mt-5 text-orange">
                     {hero.title} · {heroMeta?.categoryLabel}

@@ -29,6 +29,11 @@ export function getProductMeta(product: { metadata?: Record<string, unknown> | n
 
 import type { StoreProduct } from "./types";
 
+/** First available product image URL, or null to fall back to the emoji. */
+export function getProductImage(product: StoreProduct): string | null {
+  return product.thumbnail ?? product.images?.[0]?.url ?? null;
+}
+
 export function getVariantPrice(product: StoreProduct): number | null {
   const amount = product.variants?.[0]?.calculated_price?.calculated_amount;
   return typeof amount === "number" ? amount : null;

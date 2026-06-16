@@ -7,7 +7,7 @@ export async function Footer() {
   return (
     <footer className="border-t border-line bg-white">
       <div className="mx-auto max-w-7xl px-5 py-10">
-        <p className="eyebrow text-muted">Brands we carry</p>
+        <p className="eyebrow text-muted">Browse collections</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {collections.length === 0 && (
             <span className="text-sm text-muted">

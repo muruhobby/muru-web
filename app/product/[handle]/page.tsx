@@ -1,8 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProductByHandle } from "@/lib/data/products";
 import { ProductPurchase } from "@/components/product-purchase";
-import { getProductMeta } from "@/lib/util";
+import { getProductImage, getProductMeta } from "@/lib/util";
 
 export default async function ProductPage({
   params,
@@ -14,6 +15,7 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const { badge, categoryLabel, emoji } = getProductMeta(product);
+  const image = getProductImage(product);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
@@ -22,13 +24,24 @@ export default async function ProductPage({
       </Link>
 
       <div className="mt-6 grid gap-10 lg:grid-cols-2">
-        <div className="grid-bg relative grid h-[420px] place-items-center rounded-2xl border border-line">
+        <div className="grid-bg relative grid h-[420px] place-items-center overflow-hidden rounded-2xl border border-line">
           {badge && (
-            <span className="eyebrow absolute left-4 top-4 rounded bg-orange px-2 py-1 text-white">
+            <span className="eyebrow absolute left-4 top-4 z-10 rounded bg-orange px-2 py-1 text-white">
               {badge}
             </span>
           )}
-          <span className="text-[10rem] leading-none">{emoji}</span>
+          {image ? (
+            <Image
+              src={image}
+              alt={product.title ?? ""}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+              className="object-contain p-6"
+            />
+          ) : (
+            <span className="text-[10rem] leading-none">{emoji}</span>
+          )}
         </div>
 
         <div className="flex flex-col justify-center">

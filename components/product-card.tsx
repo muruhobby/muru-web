@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { formatIDR, getProductMeta, getVariantPrice } from "@/lib/util";
+import Image from "next/image";
+import {
+  formatIDR,
+  getProductImage,
+  getProductMeta,
+  getVariantPrice,
+} from "@/lib/util";
 import type { StoreProduct } from "@/lib/types";
 import { AddToCartButton } from "./add-to-cart-button";
 
@@ -18,6 +24,7 @@ export function ProductCard({
 }) {
   const { badge, categoryLabel, emoji } = getProductMeta(product);
   const price = getVariantPrice(product);
+  const image = getProductImage(product);
   const variantId = product?.variants?.[0]?.id ?? null;
 
   return (
@@ -30,16 +37,26 @@ export function ProductCard({
       >
         {badge && (
           <span
-            className={`eyebrow absolute left-3 top-3 rounded px-2 py-1 ${
+            className={`eyebrow absolute left-3 top-3 z-10 rounded px-2 py-1 ${
               BADGE_STYLES[badge] ?? BADGE_STYLES.NEW
             }`}
           >
             {badge}
           </span>
         )}
-        <span className="text-5xl transition-transform duration-300 group-hover:scale-110">
-          {emoji}
-        </span>
+        {image ? (
+          <Image
+            src={image}
+            alt={product.title ?? ""}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-contain p-4 transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <span className="text-5xl transition-transform duration-300 group-hover:scale-110">
+            {emoji}
+          </span>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-4">

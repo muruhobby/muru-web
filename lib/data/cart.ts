@@ -54,8 +54,8 @@ export async function addToCart(variantId: string, quantity = 1) {
     {},
     headers
   );
-  revalidatePath("/cart");
-  revalidatePath("/", "layout");
+  revalidatePath("/[lang]/cart", "page");
+  revalidatePath("/[lang]", "layout");
 }
 
 export async function updateLineItem(lineId: string, quantity: number) {
@@ -73,8 +73,8 @@ export async function updateLineItem(lineId: string, quantity: number) {
       headers
     );
   }
-  revalidatePath("/cart");
-  revalidatePath("/", "layout");
+  revalidatePath("/[lang]/cart", "page");
+  revalidatePath("/[lang]", "layout");
 }
 
 export async function removeLineItem(lineId: string) {
@@ -82,6 +82,6 @@ export async function removeLineItem(lineId: string) {
   if (!id) return;
   const headers = await getAuthHeaders();
   await sdk.store.cart.deleteLineItem(id, lineId, {}, headers);
-  revalidatePath("/cart");
-  revalidatePath("/", "layout");
+  revalidatePath("/[lang]/cart", "page");
+  revalidatePath("/[lang]", "layout");
 }

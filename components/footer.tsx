@@ -1,27 +1,28 @@
-import Link from "next/link";
 import { listCollections } from "@/lib/data/collections";
+import { LocalizedLink } from "@/components/localized-link";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-export async function Footer() {
+export async function Footer({ dict }: { dict: Dictionary }) {
   const collections = await listCollections();
 
   return (
     <footer className="border-t border-line bg-white">
       <div className="mx-auto max-w-7xl px-5 py-10">
-        <p className="eyebrow text-muted">Browse collections</p>
+        <p className="eyebrow text-muted">{dict.footer.browseCollections}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {collections.length === 0 && (
             <span className="text-sm text-muted">
-              No collections yet — add them in Medusa admin.
+              {dict.footer.noCollections}
             </span>
           )}
           {collections.map((c) => (
-            <Link
+            <LocalizedLink
               key={c.id}
               href={`/collection/${c.handle}`}
               className="rounded-md border border-line px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-ink hover:text-orange"
             >
               {c.title}
-            </Link>
+            </LocalizedLink>
           ))}
         </div>
 
@@ -30,20 +31,20 @@ export async function Footer() {
             MURU
           </span>
           <nav className="flex flex-wrap gap-5 text-sm font-semibold text-ink-soft">
-            <Link href="/faq" className="hover:text-orange">
-              FAQ
-            </Link>
-            <Link href="/shipping" className="hover:text-orange">
-              Shipping
-            </Link>
-            <Link href="/returns" className="hover:text-orange">
-              Returns
-            </Link>
-            <Link href="/contact" className="hover:text-orange">
-              Contact
-            </Link>
+            <LocalizedLink href="/faq" className="hover:text-orange">
+              {dict.footer.faq}
+            </LocalizedLink>
+            <LocalizedLink href="/shipping" className="hover:text-orange">
+              {dict.footer.shipping}
+            </LocalizedLink>
+            <LocalizedLink href="/returns" className="hover:text-orange">
+              {dict.footer.returns}
+            </LocalizedLink>
+            <LocalizedLink href="/contact" className="hover:text-orange">
+              {dict.footer.contact}
+            </LocalizedLink>
           </nav>
-          <span className="text-sm text-muted">© 2026 Muru</span>
+          <span className="text-sm text-muted">{dict.footer.copyright}</span>
         </div>
       </div>
     </footer>

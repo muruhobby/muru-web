@@ -2,18 +2,23 @@
 
 import { useState, useTransition } from "react";
 import { addToCart } from "@/lib/data/cart";
+import { useDict } from "@/components/i18n-provider";
 
 export function AddToCartButton({
   variantId,
   className = "",
-  label = "Add to cart",
+  compact = false,
 }: {
   variantId: string | null;
   className?: string;
-  label?: string;
+  /** Use the short "Add" label (e.g. on product cards) instead of "Add to cart". */
+  compact?: boolean;
 }) {
+  const dict = useDict();
   const [pending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
+
+  const label = compact ? dict.productCard.add : dict.addToCart.add;
 
   if (!variantId) {
     return (
@@ -21,7 +26,7 @@ export function AddToCartButton({
         disabled
         className={`cursor-not-allowed rounded-md border border-line px-3 py-2 text-sm font-semibold text-muted ${className}`}
       >
-        Unavailable
+        {dict.addToCart.unavailable}
       </button>
     );
   }
@@ -39,7 +44,7 @@ export function AddToCartButton({
       }
       className={`rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange disabled:opacity-60 ${className}`}
     >
-      {pending ? "Adding…" : added ? "Added ✓" : label}
+      {pending ? dict.addToCart.adding : added ? dict.addToCart.added : label}
     </button>
   );
 }

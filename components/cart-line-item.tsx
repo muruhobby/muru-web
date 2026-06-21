@@ -3,9 +3,12 @@
 import { useTransition } from "react";
 import { removeLineItem, updateLineItem } from "@/lib/data/cart";
 import { formatIDR } from "@/lib/util";
+import { interpolate } from "@/lib/i18n/config";
+import { useDict } from "@/components/i18n-provider";
 import type { StoreCartLineItem } from "@/lib/types";
 
 export function CartLineItem({ item }: { item: StoreCartLineItem }) {
+  const dict = useDict();
   const [pending, startTransition] = useTransition();
   const emoji = (item.product?.metadata?.emoji as string) || "📦";
 
@@ -23,7 +26,9 @@ export function CartLineItem({ item }: { item: StoreCartLineItem }) {
 
       <div className="min-w-0 flex-1">
         <h3 className="truncate font-bold">{item.product_title || item.title}</h3>
-        <p className="text-sm text-muted">{formatIDR(item.unit_price)} each</p>
+        <p className="text-sm text-muted">
+          {interpolate(dict.cart.each, { price: formatIDR(item.unit_price) })}
+        </p>
       </div>
 
       <div className="flex items-center rounded-md border border-line">
@@ -31,7 +36,7 @@ export function CartLineItem({ item }: { item: StoreCartLineItem }) {
           onClick={() => setQty(item.quantity - 1)}
           disabled={pending}
           className="px-3 py-1.5 text-sm font-bold hover:text-orange"
-          aria-label="Decrease quantity"
+          aria-label={dict.cart.decrease}
         >
           −
         </button>
@@ -42,7 +47,7 @@ export function CartLineItem({ item }: { item: StoreCartLineItem }) {
           onClick={() => setQty(item.quantity + 1)}
           disabled={pending}
           className="px-3 py-1.5 text-sm font-bold hover:text-orange"
-          aria-label="Increase quantity"
+          aria-label={dict.cart.increase}
         >
           +
         </button>
@@ -56,7 +61,7 @@ export function CartLineItem({ item }: { item: StoreCartLineItem }) {
         onClick={remove}
         disabled={pending}
         className="text-muted hover:text-orange"
-        aria-label="Remove item"
+        aria-label={dict.cart.remove}
       >
         ✕
       </button>

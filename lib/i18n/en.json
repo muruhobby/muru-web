@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "siteName": "Muru",
+    "titleTemplate": "%s — Muru",
+    "defaultTitle": "Muru — Premium Model Kits & Collectibles",
+    "defaultDescription": "Premium robot model kits, Kamen Rider figures, and collectibles — sourced direct, shipped fast, always authentic.",
+    "shopTitle": "Shop",
+    "shopDescription": "Browse all premium model kits, figures, and collectibles at Muru.",
+    "searchTitle": "Search",
+    "searchDescription": "Search Muru for model kits, figures, and collectibles by keyword."
+  },
+  "nav": {
+    "searchPlaceholder": "Search products…",
+    "searchAria": "Search products",
+    "account": "Account",
+    "signIn": "Sign in",
+    "cart": "Cart"
+  },
+  "announcement": {
+    "items": [
+      "BLOKEES SERIES 04 — NOW IN STOCK",
+      "FREE SHIPPING ABOVE RP 1 MIO",
+      "100% AUTHENTIC",
+      "SHIPPED NATIONWIDE"
+    ]
+  },
+  "footer": {
+    "browseCollections": "Browse collections",
+    "noCollections": "No collections yet — add them in Medusa admin.",
+    "faq": "FAQ",
+    "shipping": "Shipping",
+    "returns": "Returns",
+    "contact": "Contact",
+    "copyright": "© 2026 Muru"
+  },
+  "home": {
+    "heroEyebrow": "— New Drop — Blokees Series 04",
+    "heroTitle1": "Collect.",
+    "heroTitle2": "Build.",
+    "heroTitle3": "Display.",
+    "heroDescription": "Premium robot model kits, Kamen Rider figures, and collectibles — sourced direct, shipped fast, always authentic.",
+    "shopNow": "SHOP NOW",
+    "browseSeries": "BROWSE SERIES",
+    "statInStock": "Products in stock",
+    "statActiveSeries": "Active series",
+    "statAvgRating": "Avg. rating",
+    "newDrop": "New Drop",
+    "inStock": "In stock",
+    "filter": "Filter:",
+    "all": "All",
+    "featuredDrops": "Featured Drops",
+    "newArrivals": "New arrivals",
+    "viewAll": "View all →",
+    "features": [
+      { "title": "Fast dispatch", "body": "Orders before 2PM ship same day. Nationwide in 2–5 days." },
+      { "title": "100% authentic", "body": "Factory sealed, sourced directly from official distributors." },
+      { "title": "Builder community", "body": "2,000+ collectors on Discord sharing builds and reviews." },
+      { "title": "Easy returns", "body": "Not right? Return unopened items within 7 days, hassle-free." }
+    ],
+    "limitedOffer": "Limited offer",
+    "discountLead": "First order? Take",
+    "discountAccent": "15% off.",
+    "claimDiscount": "CLAIM DISCOUNT →"
+  },
+  "shop": {
+    "eyebrow": "All products",
+    "title": "Shop",
+    "all": "All"
+  },
+  "search": {
+    "eyebrow": "Search",
+    "titleDefault": "Search products",
+    "resultsForPrefix": "Results for",
+    "resultsCountOne": "{count} product found",
+    "resultsCountOther": "{count} products found",
+    "noResults": "No products match “{query}”. Try a different keyword.",
+    "prompt": "Type a keyword in the search bar to find products."
+  },
+  "category": {
+    "backToShop": "← All products",
+    "all": "All",
+    "empty": "No products in this category yet."
+  },
+  "collection": {
+    "backToShop": "← All products",
+    "eyebrow": "Collection",
+    "empty": "No products in this collection yet. Assign products to it in Medusa admin."
+  },
+  "product": {
+    "backToShop": "← Back to shop",
+    "authentic": "✓ 100% authentic",
+    "fastDispatch": "✓ Fast dispatch"
+  },
+  "productCard": {
+    "add": "Add",
+    "priceFallback": "—"
+  },
+  "productPurchase": {
+    "variant": "Variant",
+    "addToCart": "Add to cart",
+    "viewCart": "View cart",
+    "sku": "SKU: {sku}"
+  },
+  "addToCart": {
+    "add": "Add to cart",
+    "unavailable": "Unavailable",
+    "adding": "Adding…",
+    "added": "Added ✓"
+  },
+  "cart": {
+    "emptyTitle": "Your cart is empty",
+    "emptySubtitle": "Find your next build in the shop.",
+    "browseProducts": "Browse products",
+    "title": "Your cart",
+    "orderSummary": "Order summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "calculatedAtCheckout": "Calculated at checkout",
+    "total": "Total",
+    "checkout": "Checkout →",
+    "freeShipping": "Free shipping above {amount}",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "remove": "Remove item",
+    "each": "{price} each"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "signedInAs": "Signed in as {email}.",
+    "manageAddresses": "Manage addresses",
+    "signIn": "Sign in",
+    "signInSuffix": "to use your saved addresses.",
+    "yourOrder": "Your order",
+    "qty": "Qty {qty}",
+    "subtotal": "Subtotal",
+    "shippingNote": "Shipping calculated from your address via courier (JNE / J&T).",
+    "savedAddresses": "Saved addresses",
+    "addressFallback": "Address",
+    "shippingAddress": "Shipping address",
+    "email": "Email",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "street": "Street address",
+    "city": "City",
+    "province": "Province",
+    "postalCode": "Postal code",
+    "calculating": "Calculating…",
+    "calculateShipping": "Calculate shipping",
+    "fillAllFields": "Please fill in all fields to calculate shipping.",
+    "chooseCourier": "Choose a courier",
+    "shippingWithCourier": "Shipping ({courier})",
+    "total": "Total",
+    "placingOrder": "Placing order…",
+    "placeOrder": "Place order"
+  },
+  "account": {
+    "eyebrow": "My account",
+    "greeting": "Hi, {name}",
+    "email": "Email",
+    "name": "Name",
+    "nameFallback": "—",
+    "addressBook": "Address book",
+    "continueShopping": "Continue shopping",
+    "signOut": "Sign out",
+    "loginBackToShop": "← Back to shop",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to your Muru account.",
+    "registerBackToShop": "← Back to shop",
+    "registerTitle": "Join Muru",
+    "registerSubtitle": "Create an account to track orders and claim 15% off your first build.",
+    "addressesBack": "← Account",
+    "addressesTitle": "Address book",
+    "addressesSubtitle": "Saved addresses can be selected at checkout to calculate shipping."
+  },
+  "auth": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "password": "Password",
+    "pleaseWait": "Please wait…",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "noAccount": "No account? ",
+    "createOne": "Create one",
+    "haveAccount": "Already have an account? ",
+    "signInLink": "Sign in"
+  },
+  "address": {
+    "empty": "No saved addresses yet.",
+    "fallbackLabel": "Address",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "+ Add address",
+    "label": "Label (e.g. Home, Office)",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "street": "Street address",
+    "city": "City",
+    "province": "Province",
+    "postalCode": "Postal code",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "addAddress": "Add address",
+    "cancel": "Cancel"
+  },
+  "order": {
+    "title": "Order confirmed",
+    "thanks": "Thanks! Your order #{id} is being prepared.",
+    "confirmationSent": "A confirmation was sent to {email}.",
+    "items": "Items",
+    "qty": "Qty {qty}",
+    "total": "Total",
+    "shippingTo": "Shipping to",
+    "continueShopping": "Continue shopping"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you're looking for doesn't exist or has moved.",
+    "backHome": "Back to home"
+  }
+}

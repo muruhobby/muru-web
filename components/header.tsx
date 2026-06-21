@@ -1,10 +1,13 @@
-import Link from "next/link";
 import Form from "next/form";
 import { getCart } from "@/lib/data/cart";
 import { getCustomer } from "@/lib/data/customer";
 import { listCollections } from "@/lib/data/collections";
+import { LocalizedLink } from "@/components/localized-link";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { localePath, type Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-export async function Header() {
+export async function Header({ dict, lang }: { dict: Dictionary; lang: Locale }) {
   const [cart, customer, collections] = await Promise.all([
     getCart(),
     getCustomer(),
@@ -18,33 +21,33 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-4">
-        <Link href="/" className="flex items-baseline gap-2">
+        <LocalizedLink href="/" className="flex items-baseline gap-2">
           <span className="text-2xl font-extrabold tracking-tight text-orange">
             MURU
           </span>
-        </Link>
+        </LocalizedLink>
 
         <nav className="ml-4 hidden items-center gap-6 lg:flex">
           {nav.map((c) => (
-            <Link
+            <LocalizedLink
               key={c.id}
               href={`/collection/${c.handle}`}
               className="text-sm font-semibold text-ink-soft transition-colors hover:text-orange"
             >
               {c.title}
-            </Link>
+            </LocalizedLink>
           ))}
         </nav>
 
         <Form
-          action="/search"
+          action={localePath(lang, "/search")}
           className="relative ml-auto hidden w-full max-w-xs sm:block"
         >
           <input
             type="search"
             name="q"
-            placeholder="Search products…"
-            aria-label="Search products"
+            placeholder={dict.nav.searchPlaceholder}
+            aria-label={dict.nav.searchAria}
             className="w-full rounded-md border border-line bg-paper py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
           />
           <svg
@@ -61,21 +64,22 @@ export async function Header() {
         </Form>
 
         <div className="ml-auto flex items-center gap-3 sm:ml-0">
-          <Link
+          <LocaleSwitcher />
+          <LocalizedLink
             href="/account"
             className="hidden text-sm font-semibold text-ink-soft transition-colors hover:text-orange sm:block"
           >
-            {customer ? customer.first_name || "Account" : "Sign in"}
-          </Link>
-          <Link
+            {customer ? customer.first_name || dict.nav.account : dict.nav.signIn}
+          </LocalizedLink>
+          <LocalizedLink
             href="/cart"
             className="flex items-center gap-2 rounded-md border border-line bg-paper px-3 py-2 text-sm font-semibold transition-colors hover:border-ink"
           >
-            <span>Cart</span>
+            <span>{dict.nav.cart}</span>
             <span className="flex h-5 min-w-5 items-center justify-center rounded bg-ink px-1 text-xs font-bold text-white">
               {count}
             </span>
-          </Link>
+          </LocalizedLink>
         </div>
       </div>
     </header>

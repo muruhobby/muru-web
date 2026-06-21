@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { AddToCartButton } from "./add-to-cart-button";
+import { LocalizedLink } from "./localized-link";
 import { formatIDR } from "@/lib/util";
+import { interpolate } from "@/lib/i18n/config";
+import { useDict } from "@/components/i18n-provider";
 import type { StoreProductVariant } from "@/lib/types";
 
 export function ProductPurchase({
@@ -11,6 +13,7 @@ export function ProductPurchase({
 }: {
   variants: StoreProductVariant[];
 }) {
+  const dict = useDict();
   const [selectedId, setSelectedId] = useState(variants[0]?.id ?? null);
   const selected = variants.find((v) => v.id === selectedId) ?? variants[0];
   const price = selected?.calculated_price?.calculated_amount ?? null;
@@ -25,7 +28,8 @@ export function ProductPurchase({
       {multi && (
         <div className="mt-6">
           <p className="eyebrow text-muted">
-            Variant — <span className="text-ink">{selected?.title ?? "—"}</span>
+            {dict.productPurchase.variant} —{" "}
+            <span className="text-ink">{selected?.title ?? "—"}</span>
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {variants.map((v) => (
@@ -39,7 +43,7 @@ export function ProductPurchase({
                     : "border-line text-ink-soft hover:border-ink"
                 }`}
               >
-                {v.title ?? "Variant"}
+                {v.title ?? dict.productPurchase.variant}
               </button>
             ))}
           </div>
@@ -49,19 +53,20 @@ export function ProductPurchase({
       <div className="mt-8 flex gap-3">
         <AddToCartButton
           variantId={selected?.id ?? null}
-          label="Add to cart"
           className="px-8 py-3.5"
         />
-        <Link
+        <LocalizedLink
           href="/cart"
           className="rounded-md border border-line px-8 py-3.5 text-sm font-semibold hover:border-ink"
         >
-          View cart
-        </Link>
+          {dict.productPurchase.viewCart}
+        </LocalizedLink>
       </div>
 
       {selected?.sku && (
-        <p className="mt-3 text-xs text-muted">SKU: {selected.sku}</p>
+        <p className="mt-3 text-xs text-muted">
+          {interpolate(dict.productPurchase.sku, { sku: selected.sku })}
+        </p>
       )}
     </div>
   );

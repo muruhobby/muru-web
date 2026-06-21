@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { login, signup, type AuthState } from "@/lib/data/customer";
+import { LocalizedLink } from "./localized-link";
+import { useDict } from "@/components/i18n-provider";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
+  const dict = useDict();
   const action = mode === "login" ? login : signup;
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
     action,
@@ -15,12 +17,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     <form action={formAction} className="space-y-4">
       {mode === "register" && (
         <div className="grid grid-cols-2 gap-3">
-          <Field name="first_name" label="First name" />
-          <Field name="last_name" label="Last name" required={false} />
+          <Field name="first_name" label={dict.auth.firstName} />
+          <Field name="last_name" label={dict.auth.lastName} required={false} />
         </div>
       )}
-      <Field name="email" label="Email" type="email" />
-      <Field name="password" label="Password" type="password" />
+      <Field name="email" label={dict.auth.email} type="email" />
+      <Field name="password" label={dict.auth.password} type="password" />
 
       {state?.error && (
         <p className="rounded-md bg-orange/10 px-3 py-2 text-sm text-orange-dark">
@@ -34,26 +36,32 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         className="w-full rounded-md bg-ink px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-orange disabled:opacity-60"
       >
         {pending
-          ? "Please wait…"
+          ? dict.auth.pleaseWait
           : mode === "login"
-            ? "Sign in"
-            : "Create account"}
+            ? dict.auth.signIn
+            : dict.auth.createAccount}
       </button>
 
       <p className="text-center text-sm text-muted">
         {mode === "login" ? (
           <>
-            No account?{" "}
-            <Link href="/account/register" className="font-semibold text-orange">
-              Create one
-            </Link>
+            {dict.auth.noAccount}
+            <LocalizedLink
+              href="/account/register"
+              className="font-semibold text-orange"
+            >
+              {dict.auth.createOne}
+            </LocalizedLink>
           </>
         ) : (
           <>
-            Already have an account?{" "}
-            <Link href="/account/login" className="font-semibold text-orange">
-              Sign in
-            </Link>
+            {dict.auth.haveAccount}
+            <LocalizedLink
+              href="/account/login"
+              className="font-semibold text-orange"
+            >
+              {dict.auth.signInLink}
+            </LocalizedLink>
           </>
         )}
       </p>

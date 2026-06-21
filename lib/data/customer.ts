@@ -9,6 +9,8 @@ import {
   setAuthToken,
 } from "../cookies";
 import { getErrorMessage } from "../util";
+import { localePath } from "../i18n/config";
+import { getLocaleFromCookies } from "../i18n/server";
 import type { StoreCustomer } from "../types";
 
 export async function getCustomer(): Promise<StoreCustomer | null> {
@@ -66,8 +68,9 @@ export async function signup(
     return { error: msg };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/account");
+  const lang = await getLocaleFromCookies();
+  revalidatePath("/[lang]", "layout");
+  redirect(localePath(lang, "/account"));
 }
 
 export async function login(
@@ -91,12 +94,14 @@ export async function login(
     return { error: "Invalid email or password." };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/account");
+  const lang = await getLocaleFromCookies();
+  revalidatePath("/[lang]", "layout");
+  redirect(localePath(lang, "/account"));
 }
 
 export async function logout() {
   await removeAuthToken();
-  revalidatePath("/", "layout");
-  redirect("/");
+  const lang = await getLocaleFromCookies();
+  revalidatePath("/[lang]", "layout");
+  redirect(localePath(lang, "/"));
 }

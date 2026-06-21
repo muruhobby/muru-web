@@ -1,12 +1,8 @@
-const ITEMS = [
-  "BLOKEES SERIES 04 — NOW IN STOCK",
-  "FREE SHIPPING ABOVE RP 1 MIO",
-  "100% AUTHENTIC",
-  "SHIPPED NATIONWIDE",
-];
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-export function AnnouncementBar() {
-  const line = [...ITEMS, ...ITEMS];
+export function AnnouncementBar({ dict }: { dict: Dictionary }) {
+  const items = dict.announcement.items;
+  const line = [...items, ...items];
   return (
     <div className="bg-ink text-white overflow-hidden">
       <div className="flex w-max animate-marquee">

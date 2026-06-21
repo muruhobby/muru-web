@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import { getAuthHeaders, getCartId, removeCartId } from "../cookies";
 import { getErrorMessage } from "../util";
+import { localePath } from "../i18n/config";
+import { getLocaleFromCookies } from "../i18n/server";
 import type { StoreCartShippingOption, StoreOrder } from "../types";
 
 export type AddressInput = {
@@ -151,8 +153,9 @@ export async function placeOrder(optionId: string): Promise<{ error?: string }> 
     const result = await sdk.store.cart.complete(cartId, {}, headers);
     if (result.type === "order") {
       await removeCartId();
-      revalidatePath("/", "layout");
-      redirect(`/order/${result.order.id}`);
+      const lang = await getLocaleFromCookies();
+      revalidatePath("/[lang]", "layout");
+      redirect(localePath(lang, `/order/${result.order.id}`));
     }
     return {
       error: result.error?.message || "Could not complete the order.",

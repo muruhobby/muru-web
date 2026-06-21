@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { deleteAddress } from "@/lib/data/addresses";
 import { AddressForm } from "./address-form";
+import { useDict } from "@/components/i18n-provider";
 import type { StoreCustomerAddress } from "@/lib/types";
 
 export function AddressBook({
@@ -10,6 +11,7 @@ export function AddressBook({
 }: {
   addresses: StoreCustomerAddress[];
 }) {
+  const dict = useDict();
   const [editing, setEditing] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -18,7 +20,7 @@ export function AddressBook({
     <div className="space-y-5">
       {addresses.length === 0 && !adding && (
         <p className="rounded-xl border border-dashed border-line bg-paper p-6 text-center text-muted">
-          No saved addresses yet.
+          {dict.address.empty}
         </p>
       )}
 
@@ -33,7 +35,9 @@ export function AddressBook({
               key={a.id}
               className="flex flex-col rounded-xl border border-line bg-white p-5"
             >
-              <p className="eyebrow text-orange">{a.address_name || "Address"}</p>
+              <p className="eyebrow text-orange">
+                {a.address_name || dict.address.fallbackLabel}
+              </p>
               <p className="mt-2 font-semibold">
                 {a.first_name} {a.last_name}
               </p>
@@ -49,14 +53,14 @@ export function AddressBook({
                   onClick={() => setEditing(a.id)}
                   className="text-sm font-semibold text-ink-soft hover:text-orange"
                 >
-                  Edit
+                  {dict.address.edit}
                 </button>
                 <button
                   disabled={pending}
                   onClick={() => startTransition(() => deleteAddress(a.id))}
                   className="text-sm font-semibold text-muted hover:text-orange disabled:opacity-50"
                 >
-                  Delete
+                  {dict.address.delete}
                 </button>
               </div>
             </div>
@@ -71,7 +75,7 @@ export function AddressBook({
           onClick={() => setAdding(true)}
           className="rounded-md border border-line px-5 py-2.5 text-sm font-bold hover:border-ink"
         >
-          + Add address
+          {dict.address.add}
         </button>
       )}
     </div>

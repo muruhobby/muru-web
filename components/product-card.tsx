@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import {
   formatIDR,
@@ -8,6 +7,7 @@ import {
 } from "@/lib/util";
 import type { StoreProduct } from "@/lib/types";
 import { AddToCartButton } from "./add-to-cart-button";
+import { LocalizedLink } from "./localized-link";
 
 const BADGE_STYLES: Record<string, string> = {
   HOT: "bg-orange text-white",
@@ -29,7 +29,7 @@ export function ProductCard({
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-      <Link
+      <LocalizedLink
         href={`/product/${product.handle}`}
         className={`relative grid place-items-center bg-paper ${
           wide ? "h-44" : "h-40"
@@ -57,17 +57,17 @@ export function ProductCard({
             {emoji}
           </span>
         )}
-      </Link>
+      </LocalizedLink>
 
       <div className="flex flex-1 flex-col p-4">
         {categoryLabel && (
           <p className="eyebrow mb-1 text-muted">{categoryLabel}</p>
         )}
-        <Link href={`/product/${product.handle}`}>
+        <LocalizedLink href={`/product/${product.handle}`}>
           <h3 className="font-bold leading-snug text-ink hover:text-orange">
             {product.title}
           </h3>
-        </Link>
+        </LocalizedLink>
         {product.subtitle && (
           <p className="mt-1 text-sm text-muted">{product.subtitle}</p>
         )}
@@ -76,7 +76,7 @@ export function ProductCard({
           <span className="text-lg font-extrabold text-ink">
             {price !== null ? formatIDR(price) : "—"}
           </span>
-          <AddToCartButton variantId={variantId} label="Add" />
+          <AddToCartButton variantId={variantId} compact />
         </div>
       </div>
     </div>

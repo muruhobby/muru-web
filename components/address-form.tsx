@@ -6,6 +6,7 @@ import {
   updateAddress,
   type AddressState,
 } from "@/lib/data/addresses";
+import { useDict } from "@/components/i18n-provider";
 import type { StoreCustomerAddress } from "@/lib/types";
 
 export function AddressForm({
@@ -17,6 +18,7 @@ export function AddressForm({
   address?: StoreCustomerAddress;
   onDone: () => void;
 }) {
+  const dict = useDict();
   const action = mode === "edit" ? updateAddress : createAddress;
   const [state, formAction, pending] = useActionState<AddressState, FormData>(
     action,
@@ -32,18 +34,18 @@ export function AddressForm({
       {mode === "edit" && (
         <input type="hidden" name="address_id" defaultValue={address?.id} />
       )}
-      <Field name="address_name" label="Label (e.g. Home, Office)" defaultValue={address?.address_name} required={false} />
+      <Field name="address_name" label={dict.address.label} defaultValue={address?.address_name} required={false} />
       <div className="grid grid-cols-2 gap-3">
-        <Field name="first_name" label="First name" defaultValue={address?.first_name} />
-        <Field name="last_name" label="Last name" defaultValue={address?.last_name} required={false} />
+        <Field name="first_name" label={dict.address.firstName} defaultValue={address?.first_name} />
+        <Field name="last_name" label={dict.address.lastName} defaultValue={address?.last_name} required={false} />
       </div>
-      <Field name="phone" label="Phone" defaultValue={address?.phone} required={false} />
-      <Field name="address_1" label="Street address" defaultValue={address?.address_1} />
+      <Field name="phone" label={dict.address.phone} defaultValue={address?.phone} required={false} />
+      <Field name="address_1" label={dict.address.street} defaultValue={address?.address_1} />
       <div className="grid grid-cols-2 gap-3">
-        <Field name="city" label="City" defaultValue={address?.city} />
-        <Field name="province" label="Province" defaultValue={address?.province} required={false} />
+        <Field name="city" label={dict.address.city} defaultValue={address?.city} />
+        <Field name="province" label={dict.address.province} defaultValue={address?.province} required={false} />
       </div>
-      <Field name="postal_code" label="Postal code" defaultValue={address?.postal_code} />
+      <Field name="postal_code" label={dict.address.postalCode} defaultValue={address?.postal_code} />
 
       {state?.error && (
         <p className="rounded-md bg-orange/10 px-3 py-2 text-sm text-orange-dark">
@@ -57,14 +59,18 @@ export function AddressForm({
           disabled={pending}
           className="rounded-md bg-ink px-5 py-2.5 text-sm font-bold text-white hover:bg-orange disabled:opacity-60"
         >
-          {pending ? "Saving…" : mode === "edit" ? "Save changes" : "Add address"}
+          {pending
+            ? dict.address.saving
+            : mode === "edit"
+              ? dict.address.saveChanges
+              : dict.address.addAddress}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="rounded-md border border-line px-5 py-2.5 text-sm font-semibold hover:border-ink"
         >
-          Cancel
+          {dict.address.cancel}
         </button>
       </div>
     </form>

@@ -7,6 +7,8 @@ import {
   type ShippingOption,
 } from "@/lib/data/checkout";
 import { formatIDR } from "@/lib/util";
+import { interpolate } from "@/lib/i18n/config";
+import { useDict } from "@/components/i18n-provider";
 import type { StoreCustomerAddress } from "@/lib/types";
 
 type Addr = {
@@ -38,6 +40,7 @@ export function CheckoutClient({
   defaultEmail: string;
   subtotal: number;
 }) {
+  const dict = useDict();
   const [email, setEmail] = useState(defaultEmail);
   const [addr, setAddr] = useState<Addr>(
     addresses[0] ? pick(addresses[0]) : EMPTY
@@ -52,6 +55,11 @@ export function CheckoutClient({
 
   const chosen = options?.find((o) => o.id === optionId) ?? null;
   const shippingCost = chosen?.amount ?? 0;
+
+  // All address fields + a basic email must be filled before shipping can be priced.
+  const addressComplete = Object.values(addr).every((v) => v.trim() !== "");
+  const emailComplete = /^\S+@\S+\.\S+$/.test(email.trim());
+  const canCalculate = addressComplete && emailComplete;
 
   function selectAddress(a: StoreCustomerAddress) {
     setSelectedAddressId(a.id);
@@ -95,7 +103,7 @@ export function CheckoutClient({
       {/* Saved addresses */}
       {addresses.length > 0 && (
         <section>
-          <h2 className="eyebrow text-orange">Saved addresses</h2>
+          <h2 className="eyebrow text-orange">{dict.checkout.savedAddresses}</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {addresses.map((a) => (
               <button
@@ -107,7 +115,9 @@ export function CheckoutClient({
                     : "border-line hover:border-ink"
                 }`}
               >
-                <p className="text-sm font-bold">{a.address_name || "Address"}</p>
+                <p className="text-sm font-bold">
+                  {a.address_name || dict.checkout.addressFallback}
+                </p>
                 <p className="mt-1 text-sm text-ink-soft">
                   {a.first_name} {a.last_name} · {a.address_1}, {a.city}{" "}
                   {a.postal_code}
@@ -120,33 +130,40 @@ export function CheckoutClient({
 
       {/* Address fields */}
       <section className="space-y-4">
-        <h2 className="eyebrow text-orange">Shipping address</h2>
-        <Field label="Email" value={email} onChange={setEmail} type="email" />
+        <h2 className="eyebrow text-orange">{dict.checkout.shippingAddress}</h2>
+        <Field label={dict.checkout.email} value={email} onChange={setEmail} type="email" />
         <div className="grid grid-cols-2 gap-3">
-          <Field label="First name" value={addr.first_name} onChange={(v) => update("first_name", v)} />
-          <Field label="Last name" value={addr.last_name} onChange={(v) => update("last_name", v)} />
+          <Field label={dict.checkout.firstName} value={addr.first_name} onChange={(v) => update("first_name", v)} />
+          <Field label={dict.checkout.lastName} value={addr.last_name} onChange={(v) => update("last_name", v)} />
         </div>
-        <Field label="Phone" value={addr.phone} onChange={(v) => update("phone", v)} />
-        <Field label="Street address" value={addr.address_1} onChange={(v) => update("address_1", v)} />
+        <Field label={dict.checkout.phone} value={addr.phone} onChange={(v) => update("phone", v)} />
+        <Field label={dict.checkout.street} value={addr.address_1} onChange={(v) => update("address_1", v)} />
         <div className="grid grid-cols-2 gap-3">
-          <Field label="City" value={addr.city} onChange={(v) => update("city", v)} />
-          <Field label="Province" value={addr.province} onChange={(v) => update("province", v)} />
+          <Field label={dict.checkout.city} value={addr.city} onChange={(v) => update("city", v)} />
+          <Field label={dict.checkout.province} value={addr.province} onChange={(v) => update("province", v)} />
         </div>
-        <Field label="Postal code" value={addr.postal_code} onChange={(v) => update("postal_code", v)} />
+        <Field label={dict.checkout.postalCode} value={addr.postal_code} onChange={(v) => update("postal_code", v)} />
 
-        <button
-          onClick={calculate}
-          disabled={pending}
-          className="rounded-md bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-orange disabled:opacity-60"
-        >
-          {pending && !options ? "Calculating…" : "Calculate shipping"}
-        </button>
+        <div>
+          <button
+            onClick={calculate}
+            disabled={pending || !canCalculate}
+            className="rounded-md bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-orange disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {pending && !options
+              ? dict.checkout.calculating
+              : dict.checkout.calculateShipping}
+          </button>
+          {!canCalculate && (
+            <p className="mt-2 text-xs text-muted">{dict.checkout.fillAllFields}</p>
+          )}
+        </div>
       </section>
 
       {/* Shipping options */}
       {options && options.length > 0 && (
         <section>
-          <h2 className="eyebrow text-orange">Choose a courier</h2>
+          <h2 className="eyebrow text-orange">{dict.checkout.chooseCourier}</h2>
           <div className="mt-3 space-y-2">
             {options.map((o) => (
               <label
@@ -189,11 +206,16 @@ export function CheckoutClient({
       {chosen && (
         <section className="rounded-xl border border-line bg-paper p-5">
           <div className="space-y-2 text-sm">
-            <Row label="Subtotal" value={formatIDR(subtotal)} />
-            <Row label={`Shipping (${chosen.name})`} value={formatIDR(shippingCost)} />
+            <Row label={dict.checkout.subtotal} value={formatIDR(subtotal)} />
+            <Row
+              label={interpolate(dict.checkout.shippingWithCourier, {
+                courier: chosen.name,
+              })}
+              value={formatIDR(shippingCost)}
+            />
           </div>
           <div className="mt-3 flex justify-between border-t border-line pt-3 text-lg font-extrabold">
-            <span>Total</span>
+            <span>{dict.checkout.total}</span>
             <span>{formatIDR(subtotal + shippingCost)}</span>
           </div>
           <button
@@ -201,7 +223,7 @@ export function CheckoutClient({
             disabled={pending}
             className="mt-5 w-full rounded-md bg-orange px-5 py-3.5 text-sm font-bold text-white hover:bg-orange-dark disabled:opacity-60"
           >
-            {pending ? "Placing order…" : "Place order"}
+            {pending ? dict.checkout.placingOrder : dict.checkout.placeOrder}
           </button>
         </section>
       )}

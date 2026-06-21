@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "siteName": "Muru",
+    "titleTemplate": "%s — Muru",
+    "defaultTitle": "Muru — Model Kit & Koleksi Premium",
+    "defaultDescription": "Model kit robot premium, figur Kamen Rider, dan barang koleksi — langsung dari sumber, pengiriman cepat, selalu asli.",
+    "shopTitle": "Toko",
+    "shopDescription": "Jelajahi semua model kit, figur, dan barang koleksi premium di Muru.",
+    "searchTitle": "Cari",
+    "searchDescription": "Cari model kit, figur, dan barang koleksi di Muru berdasarkan kata kunci."
+  },
+  "nav": {
+    "searchPlaceholder": "Cari produk…",
+    "searchAria": "Cari produk",
+    "account": "Akun",
+    "signIn": "Masuk",
+    "cart": "Keranjang"
+  },
+  "announcement": {
+    "items": [
+      "BLOKEES SERIES 04 — SUDAH TERSEDIA",
+      "GRATIS ONGKIR DI ATAS RP 1 JUTA",
+      "100% ASLI",
+      "DIKIRIM KE SELURUH INDONESIA"
+    ]
+  },
+  "footer": {
+    "browseCollections": "Jelajahi koleksi",
+    "noCollections": "Belum ada koleksi — tambahkan di admin Medusa.",
+    "faq": "FAQ",
+    "shipping": "Pengiriman",
+    "returns": "Pengembalian",
+    "contact": "Kontak",
+    "copyright": "© 2026 Muru"
+  },
+  "home": {
+    "heroEyebrow": "— Rilis Baru — Blokees Series 04",
+    "heroTitle1": "Koleksi.",
+    "heroTitle2": "Rakit.",
+    "heroTitle3": "Pajang.",
+    "heroDescription": "Model kit robot premium, figur Kamen Rider, dan barang koleksi — langsung dari sumber, pengiriman cepat, selalu asli.",
+    "shopNow": "BELANJA SEKARANG",
+    "browseSeries": "LIHAT SERI",
+    "statInStock": "Produk tersedia",
+    "statActiveSeries": "Seri aktif",
+    "statAvgRating": "Rata-rata rating",
+    "newDrop": "Rilis Baru",
+    "inStock": "Tersedia",
+    "filter": "Filter:",
+    "all": "Semua",
+    "featuredDrops": "Rilisan Unggulan",
+    "newArrivals": "Baru tiba",
+    "viewAll": "Lihat semua →",
+    "features": [
+      { "title": "Pengiriman cepat", "body": "Pesanan sebelum jam 2 siang dikirim di hari yang sama. Seluruh Indonesia dalam 2–5 hari." },
+      { "title": "100% asli", "body": "Tersegel pabrik, langsung dari distributor resmi." },
+      { "title": "Komunitas perakit", "body": "2.000+ kolektor di Discord berbagi rakitan dan ulasan." },
+      { "title": "Pengembalian mudah", "body": "Tidak cocok? Kembalikan barang yang belum dibuka dalam 7 hari, tanpa ribet." }
+    ],
+    "limitedOffer": "Penawaran terbatas",
+    "discountLead": "Pesanan pertama? Dapatkan",
+    "discountAccent": "diskon 15%.",
+    "claimDiscount": "KLAIM DISKON →"
+  },
+  "shop": {
+    "eyebrow": "Semua produk",
+    "title": "Toko",
+    "all": "Semua"
+  },
+  "search": {
+    "eyebrow": "Cari",
+    "titleDefault": "Cari produk",
+    "resultsForPrefix": "Hasil untuk",
+    "resultsCountOne": "{count} produk ditemukan",
+    "resultsCountOther": "{count} produk ditemukan",
+    "noResults": "Tidak ada produk yang cocok dengan “{query}”. Coba kata kunci lain.",
+    "prompt": "Ketik kata kunci di kolom pencarian untuk menemukan produk."
+  },
+  "category": {
+    "backToShop": "← Semua produk",
+    "all": "Semua",
+    "empty": "Belum ada produk di kategori ini."
+  },
+  "collection": {
+    "backToShop": "← Semua produk",
+    "eyebrow": "Koleksi",
+    "empty": "Belum ada produk di koleksi ini. Tetapkan produk ke koleksi ini di admin Medusa."
+  },
+  "product": {
+    "backToShop": "← Kembali ke toko",
+    "authentic": "✓ 100% asli",
+    "fastDispatch": "✓ Pengiriman cepat"
+  },
+  "productCard": {
+    "add": "Tambah",
+    "priceFallback": "—"
+  },
+  "productPurchase": {
+    "variant": "Varian",
+    "addToCart": "Tambah ke keranjang",
+    "viewCart": "Lihat keranjang",
+    "sku": "SKU: {sku}"
+  },
+  "addToCart": {
+    "add": "Tambah ke keranjang",
+    "unavailable": "Tidak tersedia",
+    "adding": "Menambahkan…",
+    "added": "Ditambahkan ✓"
+  },
+  "cart": {
+    "emptyTitle": "Keranjang Anda kosong",
+    "emptySubtitle": "Temukan rakitan berikutnya di toko.",
+    "browseProducts": "Jelajahi produk",
+    "title": "Keranjang Anda",
+    "orderSummary": "Ringkasan pesanan",
+    "subtotal": "Subtotal",
+    "shipping": "Pengiriman",
+    "calculatedAtCheckout": "Dihitung saat checkout",
+    "total": "Total",
+    "checkout": "Checkout →",
+    "freeShipping": "Gratis ongkir di atas {amount}",
+    "decrease": "Kurangi jumlah",
+    "increase": "Tambah jumlah",
+    "remove": "Hapus item",
+    "each": "{price} per item"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "signedInAs": "Masuk sebagai {email}.",
+    "manageAddresses": "Kelola alamat",
+    "signIn": "Masuk",
+    "signInSuffix": "untuk memakai alamat tersimpan Anda.",
+    "yourOrder": "Pesanan Anda",
+    "qty": "Jml {qty}",
+    "subtotal": "Subtotal",
+    "shippingNote": "Ongkir dihitung dari alamat Anda via kurir (JNE / J&T).",
+    "savedAddresses": "Alamat tersimpan",
+    "addressFallback": "Alamat",
+    "shippingAddress": "Alamat pengiriman",
+    "email": "Email",
+    "firstName": "Nama depan",
+    "lastName": "Nama belakang",
+    "phone": "Telepon",
+    "street": "Alamat jalan",
+    "city": "Kota",
+    "province": "Provinsi",
+    "postalCode": "Kode pos",
+    "calculating": "Menghitung…",
+    "calculateShipping": "Hitung ongkir",
+    "fillAllFields": "Mohon isi semua kolom untuk menghitung ongkir.",
+    "chooseCourier": "Pilih kurir",
+    "shippingWithCourier": "Pengiriman ({courier})",
+    "total": "Total",
+    "placingOrder": "Memproses pesanan…",
+    "placeOrder": "Buat pesanan"
+  },
+  "account": {
+    "eyebrow": "Akun saya",
+    "greeting": "Hai, {name}",
+    "email": "Email",
+    "name": "Nama",
+    "nameFallback": "—",
+    "addressBook": "Buku alamat",
+    "continueShopping": "Lanjut belanja",
+    "signOut": "Keluar",
+    "loginBackToShop": "← Kembali ke toko",
+    "loginTitle": "Selamat datang kembali",
+    "loginSubtitle": "Masuk ke akun Muru Anda.",
+    "registerBackToShop": "← Kembali ke toko",
+    "registerTitle": "Gabung Muru",
+    "registerSubtitle": "Buat akun untuk melacak pesanan dan klaim diskon 15% untuk pembelian pertama.",
+    "addressesBack": "← Akun",
+    "addressesTitle": "Buku alamat",
+    "addressesSubtitle": "Alamat tersimpan dapat dipilih saat checkout untuk menghitung ongkir."
+  },
+  "auth": {
+    "firstName": "Nama depan",
+    "lastName": "Nama belakang",
+    "email": "Email",
+    "password": "Kata sandi",
+    "pleaseWait": "Mohon tunggu…",
+    "signIn": "Masuk",
+    "createAccount": "Buat akun",
+    "noAccount": "Belum punya akun? ",
+    "createOne": "Buat sekarang",
+    "haveAccount": "Sudah punya akun? ",
+    "signInLink": "Masuk"
+  },
+  "address": {
+    "empty": "Belum ada alamat tersimpan.",
+    "fallbackLabel": "Alamat",
+    "edit": "Ubah",
+    "delete": "Hapus",
+    "add": "+ Tambah alamat",
+    "label": "Label (mis. Rumah, Kantor)",
+    "firstName": "Nama depan",
+    "lastName": "Nama belakang",
+    "phone": "Telepon",
+    "street": "Alamat jalan",
+    "city": "Kota",
+    "province": "Provinsi",
+    "postalCode": "Kode pos",
+    "saving": "Menyimpan…",
+    "saveChanges": "Simpan perubahan",
+    "addAddress": "Tambah alamat",
+    "cancel": "Batal"
+  },
+  "order": {
+    "title": "Pesanan dikonfirmasi",
+    "thanks": "Terima kasih! Pesanan Anda #{id} sedang disiapkan.",
+    "confirmationSent": "Konfirmasi telah dikirim ke {email}.",
+    "items": "Item",
+    "qty": "Jml {qty}",
+    "total": "Total",
+    "shippingTo": "Dikirim ke",
+    "continueShopping": "Lanjut belanja"
+  },
+  "notFound": {
+    "title": "Halaman tidak ditemukan",
+    "message": "Halaman yang Anda cari tidak ada atau telah dipindahkan.",
+    "backHome": "Kembali ke beranda"
+  }
+}

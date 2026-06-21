@@ -53,8 +53,8 @@ export async function createAddress(
   } catch (e: unknown) {
     return { error: getErrorMessage(e, "Could not save address.") };
   }
-  revalidatePath("/account/addresses");
-  revalidatePath("/checkout");
+  revalidatePath("/[lang]/account/addresses", "page");
+  revalidatePath("/[lang]/checkout", "page");
   return { ok: true };
 }
 
@@ -73,8 +73,8 @@ export async function updateAddress(
   } catch (e: unknown) {
     return { error: getErrorMessage(e, "Could not update address.") };
   }
-  revalidatePath("/account/addresses");
-  revalidatePath("/checkout");
+  revalidatePath("/[lang]/account/addresses", "page");
+  revalidatePath("/[lang]/checkout", "page");
   return { ok: true };
 }
 
@@ -82,6 +82,6 @@ export async function deleteAddress(addressId: string) {
   const headers = await getAuthHeaders();
   if (!("authorization" in headers)) return;
   await sdk.store.customer.deleteAddress(addressId, headers);
-  revalidatePath("/account/addresses");
-  revalidatePath("/checkout");
+  revalidatePath("/[lang]/account/addresses", "page");
+  revalidatePath("/[lang]/checkout", "page");
 }

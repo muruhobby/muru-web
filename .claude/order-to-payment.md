@@ -117,7 +117,7 @@ Two independent signals leave Midtrans:
      *Not fulfilled* — i.e. paid, waiting for shipment.
 
 A CANCELED action (expiry/denial) cancels the payment session instead; the order stays
-unpaid and can be canceled from the admin. Snap transactions expire after ~24h unpaid.
+unpaid until the auto-cancel job sweeps it. Snap transactions expire after ~24h unpaid.
 
 ## Phase 4 — the storefront finds out
 
@@ -132,8 +132,9 @@ unpaid and can be canceled from the admin. Snap transactions expire after ~24h u
    to `/order/{order_id}` — the confirmation page (items, address, totals via `getOrder`).
 
 If the customer closed the tab after paying: the webhook still captures; the order was
-already theirs. If they never pay: the order stays Authorized until the Snap transaction
-expires; the cart cookie is already gone, so their next visit starts a fresh cart.
+already theirs. If they never pay: the Snap transaction expires (~24h), and the hourly
+`cancel-unpaid-orders` job cancels the order after `UNPAID_ORDER_CANCEL_HOURS` (default
+48h); the cart cookie is already gone, so their next visit starts a fresh cart.
 
 ## Phase 5 — after the order (admin)
 
@@ -142,7 +143,9 @@ expires; the cart cookie is already gone, so their next visit starts a fresh car
   identity was persisted on the shipping method at checkout) with waybill/tracking URL.
 - **Refund** from the admin → provider `refundPayment` → Midtrans
   `POST /v2/{order_id}/refund` with a unique `refund_key`.
-- Unpaid, expired orders: cancel manually from the admin (or add a scheduled job later).
+- Unpaid orders are swept automatically: the hourly `cancel-unpaid-orders` job
+  (`src/jobs/`) cancels orders older than `UNPAID_ORDER_CANCEL_HOURS` (default 48h) with
+  no captured payment, canceling the payment session and releasing stock reservations.
 
 ## Amount & currency notes
 

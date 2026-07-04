@@ -70,8 +70,9 @@ the page renders the receipt. Unknown ids → `notFound()`. The page is `robots:
 - A forged webhook cannot mark an order paid out of thin air: notifications are
   signature-verified, and capture records what Midtrans actually settled.
 - If the customer abandons the Midtrans page, the order stays *Authorized* (unpaid); the
-  Snap transaction expires after ~24h. The cart cookie is gone, so the next visit starts
-  a fresh cart; the stale order can be canceled from the admin.
+  Snap transaction expires after ~24h, and the backend's hourly `cancel-unpaid-orders`
+  job auto-cancels the order after 48h (`UNPAID_ORDER_CANCEL_HOURS`). The cart cookie is
+  gone, so the next visit starts a fresh cart.
 - If cart completion fails, `startPayment` returns the error and no redirect happens —
   the cart is untouched.
 - `checkPaymentStatus` swallows all errors as "still pending" so transient backend

@@ -46,8 +46,9 @@ fulfillment status stays "not fulfilled" until staff ship it — that's the "pai
 shipment" state.
 
 If the customer never pays, the Snap transaction expires (~24h) and the webhook reports
-`expire` → the payment session is canceled; the order remains with an unpaid/canceled payment
-and can be canceled from the admin.
+`expire` → the payment session is canceled. The backend's hourly `cancel-unpaid-orders` job
+then auto-cancels any order still unpaid after `UNPAID_ORDER_CANCEL_HOURS` (default 48h,
+`0` disables), releasing its stock reservations.
 
 ## Key files
 

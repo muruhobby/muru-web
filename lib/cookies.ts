@@ -23,6 +23,23 @@ export async function removeAuthToken() {
   (await nextCookies()).set("_medusa_jwt", "", { ...baseOpts, maxAge: -1 });
 }
 
+// Order awaiting payment (order-first checkout): set when the cart is
+// completed just before redirecting to Midtrans, cleared once the payment is
+// confirmed. Lets the processing page find the order without the cart.
+const DAY = 60 * 60 * 24;
+
+export async function getPendingOrderId() {
+  return (await nextCookies()).get("_medusa_order_id")?.value;
+}
+
+export async function setPendingOrderId(id: string) {
+  (await nextCookies()).set("_medusa_order_id", id, { ...baseOpts, maxAge: DAY });
+}
+
+export async function removePendingOrderId() {
+  (await nextCookies()).set("_medusa_order_id", "", { ...baseOpts, maxAge: -1 });
+}
+
 export async function getCartId() {
   return (await nextCookies()).get("_medusa_cart_id")?.value;
 }

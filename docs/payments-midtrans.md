@@ -5,10 +5,13 @@ How checkout payment works, configured as a **Medusa payment provider** in the b
 
 ## Overview
 
-Payment uses **Midtrans Snap** in **redirect** mode. After the customer calculates shipping and
-picks a courier, they confirm and are sent to Midtrans' hosted payment page. The **Medusa order
-is created only after Midtrans confirms payment**, driven by the **webhook** — so it works even
-if the customer closes the tab or pays later by **QRIS / virtual account**.
+Payment uses **Midtrans Snap** in **redirect** mode, with **order-first checkout**: after the
+customer calculates shipping and picks a courier, confirming **creates the Medusa order
+immediately** (payment authorized but unpaid) and then sends them to Midtrans' hosted payment
+page. When Midtrans confirms payment via the **webhook**, the payment is **captured** and the
+order flips to paid — awaiting fulfillment. This works even if the customer closes the tab or
+pays later by **QRIS / virtual account**; the order is already there, only its payment status
+changes.
 
 Because this is a real Medusa payment provider (`pp_midtrans_midtrans`), Medusa records the
 actual captured payment and supports **refunds from the admin** — unlike a storefront-only
@@ -21,21 +24,30 @@ muru-web: Confirm & pay
   → initiatePaymentSession(cart, "pp_midtrans_midtrans")
       → [muru-cms] provider.initiatePayment(): Snap create (SERVER KEY)
         → returns redirect_url in the payment session `data`
+  → cart.complete() → ORDER created now (provider authorizes pending txns)
+        clear cart cookie, remember order id in _medusa_order_id cookie
   → storefront redirects customer to Midtrans hosted page
   → customer pays (card instantly / QRIS-VA later)
        ├─ Midtrans webhook → POST /hooks/payment/midtrans_midtrans   [muru-cms, built-in]
        │     provider.getWebhookActionAndData() verifies signature → SUCCESSFUL
-       │     → processPaymentWorkflow authorizes + captures + completes cart → ORDER
+       │     → processPaymentWorkflow → capturePayment → order is PAID
        └─ Midtrans redirect → muru-web /checkout/processing  ("processing" + Verify button)
-             Verify/poll → checkPaymentStatus() → GET /store/checkout/status?cart_id [muru-cms]
-                            → { order_id } once the webhook created it
-             order_id → clear cart cookie → /order/[id]
+             Verify/poll → checkPaymentStatus() → GET /store/checkout/status?order_id [muru-cms]
+                            → { order_id, paid: true } once the webhook captured it
+             paid → clear order cookie → /order/[id]
 Admin refund → provider.refundPayment() → Midtrans refund API
 ```
 
-The **webhook is the source of truth**; the processing page's **Verify payment** button + light
-auto-poll just check whether the order exists yet (read-only), which matters for QRIS/VA that
-settle minutes/hours later.
+The **webhook is the source of truth for payment**; the processing page's **Verify payment**
+button + light auto-poll just check whether the payment has been captured yet (read-only),
+which matters for QRIS/VA that settle minutes/hours later. In the Medusa admin the order
+shows payment **Authorized** (awaiting payment) until settlement, then **Captured** (paid);
+fulfillment status stays "not fulfilled" until staff ship it — that's the "paid, waiting for
+shipment" state.
+
+If the customer never pays, the Snap transaction expires (~24h) and the webhook reports
+`expire` → the payment session is canceled; the order remains with an unpaid/canceled payment
+and can be canceled from the admin.
 
 ## Key files
 
@@ -43,16 +55,16 @@ settle minutes/hours later.
 | File | Role |
 | --- | --- |
 | `src/modules/midtrans/client.ts` | Snap create / status / refund / cancel + `verifySignature`. |
-| `src/modules/midtrans/service.ts` | `MidtransPaymentProviderService extends AbstractPaymentProvider`. `initiatePayment` (Snap, `order_id = session_id`), `authorize`/`getPaymentStatus` (live status — authorization only succeeds once Midtrans really reports the money as paid, so a forged webhook can't create an order), `capture`, `refund`, `cancel`, and `getWebhookActionAndData` (→ `SUCCESSFUL` on settlement). |
+| `src/modules/midtrans/service.ts` | `MidtransPaymentProviderService extends AbstractPaymentProvider`. `initiatePayment` (Snap, `order_id = session_id`), `authorizePayment` (order-first: a still-pending transaction authorizes so cart completion succeeds pre-payment; denied/expired don't), `getPaymentStatus` (live status), `capture`, `refund`, `cancel`, and `getWebhookActionAndData` (→ `SUCCESSFUL` on settlement → capture; signature-verified, so a forged webhook can't mark an order paid). |
 | `src/modules/midtrans/index.ts` | `ModuleProvider(Modules.PAYMENT, …)`. |
 | `medusa-config.ts` | Registers the provider (`id: "midtrans"` → `pp_midtrans_midtrans`). |
 | `src/scripts/setup-id-storefront.ts` | Enables the provider on the Indonesia region. |
-| `src/api/store/checkout/status/route.ts` | Read-only "is the order created yet?" for the Verify button. |
+| `src/api/store/checkout/status/route.ts` | Read-only "is the order paid yet?" (`order_id` or `cart_id`) for the Verify button. |
 
 **Storefront (`muru-web`)**
 | File | Role |
 | --- | --- |
-| `lib/data/checkout.ts` | `startPayment` (initiate session → `redirect_url`), `checkPaymentStatus` (poll backend status). |
+| `lib/data/checkout.ts` | `startPayment` (initiate session → complete cart → **order created** → `redirect_url`), `checkPaymentStatus` (poll paid status by order id). |
 | `app/[lang]/checkout/processing/page.tsx` | Processing / failed UI. |
 | `components/verify-payment.tsx` | "I've paid — verify payment" button + auto-poll → redirect to `/order/[id]`. |
 
@@ -92,13 +104,14 @@ that URL — either in the dashboard or via `MIDTRANS_NOTIFICATION_URL`.
    **only** `pp_midtrans_midtrans` on the region and detaches `pp_system_default`.
 2. Confirm: `GET /store/payment-providers?region_id=…` lists **only** `pp_midtrans_midtrans`.
 3. `ngrok http 9000` → set the notification URL.
-4. In `muru-web`: cart → checkout → fill form → calculate shipping → courier → **Confirm & pay**
-   → Midtrans page. Card `4811 1111 1111 1114`, any future expiry/CVV, OTP `112233`.
+4. In `muru-web`: cart → checkout → fill form → calculate shipping → courier → **Confirm & pay**.
+   The **order is created now** (admin shows it with payment *Authorized*), then the browser
+   goes to the Midtrans page. Card `4811 1111 1111 1114`, any future expiry/CVV, OTP `112233`.
 5. Return to `/checkout/processing` → **Verify payment** (or wait for the poll) → `/order/[id]`.
-   In Medusa **admin** the order shows a **Midtrans** payment (captured).
-6. **QRIS/VA:** pick VA, don't pay → processing stays pending; settle it (real payment or the
-   Midtrans dashboard) → webhook completes → Verify/poll lands on the order.
-7. **Closed-tab:** pay then close before redirect → webhook still creates the order.
+   In Medusa **admin** the order's payment is now **Captured** (paid), fulfillment pending.
+6. **QRIS/VA:** pick VA, don't pay → processing stays pending and the order stays *Authorized*;
+   settle it (real payment or the simulator) → webhook captures → Verify/poll lands on the order.
+7. **Closed-tab:** pay then close before redirect → webhook still marks the order paid.
 8. **Refund:** refund the order in Medusa admin → `provider.refundPayment` hits Midtrans.
 
 ## Tests

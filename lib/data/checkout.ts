@@ -1,7 +1,15 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
-import { getAuthHeaders, getCartId, removeCartId } from "../cookies";
+import {
+  getAuthHeaders,
+  getCartId,
+  removeCartId,
+  getPendingOrderId,
+  setPendingOrderId,
+  removePendingOrderId,
+} from "../cookies";
 import { getErrorMessage } from "../util";
 import type { StoreCartShippingOption, StoreOrder } from "../types";
 
@@ -122,10 +130,12 @@ export async function applyAddressAndGetRates(
 }
 
 /**
- * Locks in the chosen shipping method and initiates the Midtrans payment session
- * via Medusa's payment module. The backend Midtrans provider creates the Snap
- * transaction and returns the hosted-payment redirect URL in the session `data`.
- * The order is completed by the Midtrans webhook once payment settles.
+ * Order-first checkout. Locks in the chosen shipping method, initiates the
+ * Midtrans payment session (the backend provider creates the Snap transaction
+ * and returns the hosted-payment redirect URL), then **completes the cart so
+ * the Medusa order exists before the customer leaves for Midtrans**. The order
+ * starts with its payment authorized-but-unpaid; the settlement webhook
+ * captures it, flipping the order to paid.
  */
 export async function startPayment(
   optionId: string
@@ -166,6 +176,19 @@ export async function startPayment(
     if (!redirectUrl) {
       return { error: "Could not start payment. Please try again." };
     }
+
+    // Create the order now, before the redirect. The Midtrans provider
+    // authorizes pending transactions, so completion succeeds pre-payment.
+    const result = await sdk.store.cart.complete(cartId, {}, headers);
+    if (result.type !== "order") {
+      return {
+        error: result.error?.message || "Could not place the order. Please try again.",
+      };
+    }
+
+    await removeCartId();
+    await setPendingOrderId(result.order.id);
+    revalidatePath("/[lang]", "layout");
     return { redirectUrl };
   } catch (e: unknown) {
     return {
@@ -174,29 +197,51 @@ export async function startPayment(
   }
 }
 
+type CheckoutStatus = { status: string; order_id?: string; paid?: boolean };
+
 /**
- * Polled by the processing page's "Verify payment" button. Asks the backend
- * whether the order for the current cart has been created yet (the Midtrans
- * webhook completes it). On success, clears the cart cookie and returns the
- * order id so the client can redirect to the confirmation page.
+ * Polled by the processing page's "Verify payment" button. The order already
+ * exists (created before the Midtrans redirect); this asks the backend whether
+ * its payment has been captured yet (the settlement webhook does that). Once
+ * paid, clears the pending-order cookie and returns the order id so the client
+ * can redirect to the confirmation page.
  */
 export async function checkPaymentStatus(): Promise<{
   orderId?: string;
   pending?: boolean;
 }> {
+  const orderId = await getPendingOrderId();
+  if (orderId) {
+    try {
+      const result = await sdk.client.fetch<CheckoutStatus>(
+        "/store/checkout/status",
+        { query: { order_id: orderId } }
+      );
+      if (result.order_id && result.paid) {
+        await removePendingOrderId();
+        return { orderId: result.order_id };
+      }
+    } catch {
+      // Treat any error as "still pending"; the webhook will capture it.
+    }
+    return { pending: true };
+  }
+
+  // Fallback for payments started before the order-first flow, where the cart
+  // cookie survived the redirect and the webhook creates the order.
   const cartId = await getCartId();
   if (!cartId) return { pending: true };
   try {
-    const result = await sdk.client.fetch<{
-      status: string;
-      order_id?: string;
-    }>("/store/checkout/status", { query: { cart_id: cartId } });
-    if (result.order_id) {
+    const result = await sdk.client.fetch<CheckoutStatus>(
+      "/store/checkout/status",
+      { query: { cart_id: cartId } }
+    );
+    if (result.order_id && result.paid !== false) {
       await removeCartId();
       return { orderId: result.order_id };
     }
   } catch {
-    // Treat any error as "still pending"; the webhook will complete it.
+    // Still pending.
   }
   return { pending: true };
 }

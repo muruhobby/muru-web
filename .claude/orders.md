@@ -1,10 +1,11 @@
 # muru-web — cart, checkout & order logic
 
-End-to-end flow from "add to cart" to the order confirmation page. The storefront never
-creates the order itself — **the Medusa order is created by the backend when the
-Midtrans payment webhook confirms settlement**. A step-by-step walkthrough of the whole
-payment lifecycle across both repos is in [order-to-payment.md](order-to-payment.md);
-manual test steps are in `docs/payments-midtrans.md`.
+End-to-end flow from "add to cart" to the order confirmation page. Checkout is
+**order-first**: the Medusa order is created right before the customer is redirected to
+Midtrans (payment authorized but unpaid); the settlement webhook later **captures** the
+payment, flipping the order to paid. A step-by-step walkthrough of the whole payment
+lifecycle across both repos is in [order-to-payment.md](order-to-payment.md); manual
+test steps are in `docs/payments-midtrans.md`.
 
 ## 1. Cart (`lib/data/cart.ts`)
 
@@ -29,14 +30,19 @@ Driven by `components/checkout-client.tsx` on `/checkout`:
    logged server-side), and only if *no* option survives does the customer see an error
    (usual causes: bad postal code, Biteship balance).
 
-## 3. Confirm & pay (`startPayment`)
+## 3. Confirm & pay (`startPayment`) — the order is created here
 
 1. Locks in the chosen shipping option (`addShippingMethod`) — the total is now final.
 2. Initiates a payment session for provider `pp_midtrans_midtrans`. The backend provider
    creates a Midtrans **Snap** transaction (its `order_id` = the Medusa payment session
    id) and returns `redirect_url` in the session data.
-3. The client does `window.location.href = redirectUrl` — the customer pays on Midtrans'
-   hosted page (card, QRIS, virtual account, etc.).
+3. **Completes the cart** (`sdk.store.cart.complete`) — the Medusa order now exists with
+   its payment *Authorized* (unpaid). The provider authorizes still-pending Midtrans
+   transactions precisely to make this pre-payment completion possible.
+4. Clears the cart cookie, stores the order id in the httpOnly `_medusa_order_id` cookie
+   (1 day) for the processing page, revalidates the layout (cart badge), and returns
+   `redirectUrl`; the client does `window.location.href = redirectUrl` — the customer
+   pays on Midtrans' hosted page (card, QRIS, virtual account, etc.).
 
 ## 4. Processing page (`/checkout/processing`)
 
@@ -46,12 +52,13 @@ Midtrans' finish-redirect lands here (`transaction_status` query param; `deny`/`
 `components/verify-payment.tsx` handles the pending state:
 - Auto-polls `checkPaymentStatus()` every 4s for ~2 minutes, plus a manual
   "I've paid — verify payment" button.
-- `checkPaymentStatus()` calls the backend's read-only `/store/checkout/status?cart_id=…`
-  which reports whether an order exists for the cart yet. **The webhook is the source of
-  truth** — this endpoint only observes. This matters for QRIS/VA payments that settle
-  minutes or hours later, and for customers who close the tab (the order still gets
-  created; it shows up in their account).
-- On success it clears the cart cookie and redirects to `/order/[id]`.
+- `checkPaymentStatus()` reads the pending-order cookie and calls the backend's read-only
+  `/store/checkout/status?order_id=…`, which reports whether the order's payment has been
+  captured yet. **The settlement webhook is what captures it** — this endpoint only
+  observes. This matters for QRIS/VA payments that settle minutes or hours later, and for
+  customers who close the tab (the order is already theirs; it just flips to paid).
+  A `cart_id` fallback still exists for payments started before the order-first flow.
+- Once paid it clears the order cookie and redirects to `/order/[id]`.
 
 ## 5. Order confirmation (`/order/[id]`)
 
@@ -60,9 +67,12 @@ the page renders the receipt. Unknown ids → `notFound()`. The page is `robots:
 
 ## Failure modes to keep in mind
 
-- A forged or premature webhook cannot create an order: the backend provider re-checks
-  the live Midtrans transaction status before authorizing.
-- If the customer abandons the Midtrans page, the cart (and cookie) survive — they can
-  restart checkout; re-initiating creates a fresh payment session.
+- A forged webhook cannot mark an order paid out of thin air: notifications are
+  signature-verified, and capture records what Midtrans actually settled.
+- If the customer abandons the Midtrans page, the order stays *Authorized* (unpaid); the
+  Snap transaction expires after ~24h. The cart cookie is gone, so the next visit starts
+  a fresh cart; the stale order can be canceled from the admin.
+- If cart completion fails, `startPayment` returns the error and no redirect happens —
+  the cart is untouched.
 - `checkPaymentStatus` swallows all errors as "still pending" so transient backend
   hiccups never strand the customer on an error screen.

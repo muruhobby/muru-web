@@ -151,8 +151,22 @@
     "chooseCourier": "Choose a courier",
     "shippingWithCourier": "Shipping ({courier})",
     "total": "Total",
-    "placingOrder": "Placing order…",
-    "placeOrder": "Place order"
+    "confirmAndPay": "Confirm & pay",
+    "redirecting": "Redirecting to payment…",
+    "payNote": "You'll be redirected to Midtrans to pay securely."
+  },
+  "processing": {
+    "successTitle": "Payment received",
+    "successBody": "Finalizing your order…",
+    "pendingTitle": "Waiting for payment",
+    "pendingBody": "We haven't received your payment yet. If you paid via bank transfer or virtual account, your order will be confirmed automatically once it settles.",
+    "failedTitle": "Payment not completed",
+    "failedBody": "Your payment wasn't completed. You can try again from checkout.",
+    "backToCheckout": "Back to checkout",
+    "checkOrders": "Go to my account",
+    "verifyButton": "I've paid — verify payment",
+    "checking": "Checking…",
+    "stillPending": "We haven't received your payment yet. If you just paid, give it a moment and try again."
   },
   "account": {
     "eyebrow": "My account",

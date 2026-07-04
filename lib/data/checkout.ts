@@ -1,13 +1,11 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import { getAuthHeaders, getCartId, removeCartId } from "../cookies";
 import { getErrorMessage } from "../util";
-import { localePath } from "../i18n/config";
-import { getLocaleFromCookies } from "../i18n/server";
 import type { StoreCartShippingOption, StoreOrder } from "../types";
+
+const MIDTRANS_PROVIDER_ID = "pp_midtrans_midtrans";
 
 export type AddressInput = {
   email: string;
@@ -123,8 +121,15 @@ export async function applyAddressAndGetRates(
   }
 }
 
-/** Adds the chosen shipping method, initiates payment, and completes the order. */
-export async function placeOrder(optionId: string): Promise<{ error?: string }> {
+/**
+ * Locks in the chosen shipping method and initiates the Midtrans payment session
+ * via Medusa's payment module. The backend Midtrans provider creates the Snap
+ * transaction and returns the hosted-payment redirect URL in the session `data`.
+ * The order is completed by the Midtrans webhook once payment settles.
+ */
+export async function startPayment(
+  optionId: string
+): Promise<{ redirectUrl?: string; error?: string }> {
   const cartId = await getCartId();
   if (!cartId) return { error: "Your cart is empty." };
   if (!optionId) return { error: "Please choose a shipping method." };
@@ -143,36 +148,57 @@ export async function placeOrder(optionId: string): Promise<{ error?: string }> 
       { fields: "*payment_collection" },
       headers
     );
-    await sdk.store.payment.initiatePaymentSession(
+
+    const { payment_collection } = await sdk.store.payment.initiatePaymentSession(
       cart,
-      { provider_id: "pp_system_default" },
+      { provider_id: MIDTRANS_PROVIDER_ID },
       {},
       headers
     );
 
-    const result = await sdk.store.cart.complete(cartId, {}, headers);
-    if (result.type === "order") {
-      await removeCartId();
-      const lang = await getLocaleFromCookies();
-      revalidatePath("/[lang]", "layout");
-      redirect(localePath(lang, `/order/${result.order.id}`));
+    const session =
+      payment_collection?.payment_sessions?.find(
+        (s) => s.provider_id === MIDTRANS_PROVIDER_ID
+      ) ?? payment_collection?.payment_sessions?.[0];
+    const redirectUrl = (session?.data as { redirect_url?: string } | undefined)
+      ?.redirect_url;
+
+    if (!redirectUrl) {
+      return { error: "Could not start payment. Please try again." };
     }
-    return {
-      error: result.error?.message || "Could not complete the order.",
-    };
+    return { redirectUrl };
   } catch (e: unknown) {
-    if (e instanceof Error && e.message?.includes("NEXT_REDIRECT")) throw e;
-    if (
-      typeof e === "object" &&
-      e !== null &&
-      "digest" in e &&
-      typeof (e as { digest?: unknown }).digest === "string" &&
-      (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-    ) {
-      throw e;
-    }
-    return { error: getErrorMessage(e, "Checkout failed. Please try again.") };
+    return {
+      error: getErrorMessage(e, "Could not start payment. Please try again."),
+    };
   }
+}
+
+/**
+ * Polled by the processing page's "Verify payment" button. Asks the backend
+ * whether the order for the current cart has been created yet (the Midtrans
+ * webhook completes it). On success, clears the cart cookie and returns the
+ * order id so the client can redirect to the confirmation page.
+ */
+export async function checkPaymentStatus(): Promise<{
+  orderId?: string;
+  pending?: boolean;
+}> {
+  const cartId = await getCartId();
+  if (!cartId) return { pending: true };
+  try {
+    const result = await sdk.client.fetch<{
+      status: string;
+      order_id?: string;
+    }>("/store/checkout/status", { query: { cart_id: cartId } });
+    if (result.order_id) {
+      await removeCartId();
+      return { orderId: result.order_id };
+    }
+  } catch {
+    // Treat any error as "still pending"; the webhook will complete it.
+  }
+  return { pending: true };
 }
 
 export async function getOrder(orderId: string): Promise<StoreOrder | null> {

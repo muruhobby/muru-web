@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import {
   applyAddressAndGetRates,
-  placeOrder,
+  startPayment,
   type ShippingOption,
 } from "@/lib/data/checkout";
 import { formatIDR } from "@/lib/util";
@@ -93,8 +93,13 @@ export function CheckoutClient({
     if (!optionId) return;
     setError(null);
     startTransition(async () => {
-      const res = await placeOrder(optionId);
-      if (res?.error) setError(res.error);
+      const res = await startPayment(optionId);
+      if (res.error) {
+        setError(res.error);
+      } else if (res.redirectUrl) {
+        // Leave the site for the Midtrans hosted payment page.
+        window.location.href = res.redirectUrl;
+      }
     });
   }
 
@@ -223,8 +228,11 @@ export function CheckoutClient({
             disabled={pending}
             className="mt-5 w-full rounded-md bg-orange px-5 py-3.5 text-sm font-bold text-white hover:bg-orange-dark disabled:opacity-60"
           >
-            {pending ? dict.checkout.placingOrder : dict.checkout.placeOrder}
+            {pending ? dict.checkout.redirecting : dict.checkout.confirmAndPay}
           </button>
+          <p className="mt-2 text-center text-xs text-muted">
+            {dict.checkout.payNote}
+          </p>
         </section>
       )}
     </div>

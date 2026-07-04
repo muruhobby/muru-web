@@ -151,8 +151,22 @@
     "chooseCourier": "Pilih kurir",
     "shippingWithCourier": "Pengiriman ({courier})",
     "total": "Total",
-    "placingOrder": "Memproses pesanan…",
-    "placeOrder": "Buat pesanan"
+    "confirmAndPay": "Konfirmasi & bayar",
+    "redirecting": "Mengalihkan ke pembayaran…",
+    "payNote": "Anda akan dialihkan ke Midtrans untuk membayar dengan aman."
+  },
+  "processing": {
+    "successTitle": "Pembayaran diterima",
+    "successBody": "Menyelesaikan pesanan Anda…",
+    "pendingTitle": "Menunggu pembayaran",
+    "pendingBody": "Kami belum menerima pembayaran Anda. Jika Anda membayar via transfer bank atau virtual account, pesanan akan dikonfirmasi otomatis setelah pembayaran masuk.",
+    "failedTitle": "Pembayaran belum selesai",
+    "failedBody": "Pembayaran Anda belum selesai. Anda dapat mencoba lagi dari halaman checkout.",
+    "backToCheckout": "Kembali ke checkout",
+    "checkOrders": "Ke akun saya",
+    "verifyButton": "Saya sudah bayar — verifikasi pembayaran",
+    "checking": "Memeriksa…",
+    "stillPending": "Kami belum menerima pembayaran Anda. Jika Anda baru saja membayar, tunggu sebentar lalu coba lagi."
   },
   "account": {
     "eyebrow": "Akun saya",

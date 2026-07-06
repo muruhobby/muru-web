@@ -1,19 +1,17 @@
-import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
 import { LocalizedLink } from "@/components/localized-link";
-import { getCustomer } from "@/lib/data/customer";
-import { localePath, type Locale } from "@/lib/i18n/config";
+import { type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 
 export const metadata = { robots: { index: false } };
 
+// Static page; AuthForm redirects signed-in customers client-side.
 export default async function LoginPage({
   params,
 }: {
   params: Promise<{ lang: Locale }>;
 }) {
   const { lang } = await params;
-  if (await getCustomer()) redirect(localePath(lang, "/account"));
   const dict = await getDictionary(lang);
 
   return (

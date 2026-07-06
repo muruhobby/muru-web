@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { removeLineItem, updateLineItem } from "@/lib/data/cart";
+import { useStore } from "@/components/store-provider";
 import { formatIDR } from "@/lib/util";
 import { interpolate } from "@/lib/i18n/config";
 import { useDict } from "@/components/i18n-provider";
@@ -9,12 +9,13 @@ import type { StoreCartLineItem } from "@/lib/types";
 
 export function CartLineItem({ item }: { item: StoreCartLineItem }) {
   const dict = useDict();
+  const { updateItem, removeItem } = useStore();
   const [pending, startTransition] = useTransition();
   const emoji = (item.product?.metadata?.emoji as string) || "📦";
 
   const setQty = (q: number) =>
-    startTransition(() => updateLineItem(item.id, q));
-  const remove = () => startTransition(() => removeLineItem(item.id));
+    startTransition(() => updateItem(item.id, q));
+  const remove = () => startTransition(() => removeItem(item.id));
 
   return (
     <div

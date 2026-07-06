@@ -1,13 +1,12 @@
-import { redirect } from "next/navigation";
-import { getCustomer } from "@/lib/data/customer";
-import { getAddresses } from "@/lib/data/addresses";
 import { AddressBook } from "@/components/address-book";
 import { LocalizedLink } from "@/components/localized-link";
-import { localePath, type Locale } from "@/lib/i18n/config";
+import { type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 
 export const metadata = { robots: { index: false } };
 
+// Static shell; AddressBook fetches the customer's addresses client-side and
+// redirects to the login page when signed out.
 export default async function AddressesPage({
   params,
 }: {
@@ -15,9 +14,6 @@ export default async function AddressesPage({
 }) {
   const { lang } = await params;
   const dict = await getDictionary(lang);
-  const customer = await getCustomer();
-  if (!customer) redirect(localePath(lang, "/account/login"));
-  const addresses = await getAddresses();
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
@@ -33,7 +29,7 @@ export default async function AddressesPage({
       <p className="mt-2 text-ink-soft">{dict.account.addressesSubtitle}</p>
 
       <div className="mt-8">
-        <AddressBook addresses={addresses} />
+        <AddressBook />
       </div>
     </div>
   );

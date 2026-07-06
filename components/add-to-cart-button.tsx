@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addToCart } from "@/lib/data/cart";
+import { useStore } from "@/components/store-provider";
 import { useDict } from "@/components/i18n-provider";
 
 export function AddToCartButton({
@@ -15,6 +15,7 @@ export function AddToCartButton({
   compact?: boolean;
 }) {
   const dict = useDict();
+  const { addItem } = useStore();
   const [pending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
 
@@ -37,7 +38,7 @@ export function AddToCartButton({
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await addToCart(variantId, 1);
+          await addItem(variantId, 1);
           setAdded(true);
           setTimeout(() => setAdded(false), 1500);
         })

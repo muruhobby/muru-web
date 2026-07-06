@@ -36,23 +36,36 @@ cross-repo payment lifecycle). Payment integration details: `docs/payments-midtr
 | `/order/[id]` | Order confirmation. |
 | `/account`, `/account/login`, `/account/register`, `/account/addresses` | Customer area (see auth.md). |
 
-## Data layer (`lib/data/*`)
+## Data layer — server catalog vs browser session
 
-Server-only modules. Mutations are `"use server"` actions; catalog reads are cached.
+Split so pages stay static/cacheable: public catalog data is fetched on the server and
+cached; session data (cart, customer, checkout) is fetched **from the browser** straight
+against the Medusa store API.
 
+**`lib/data/*` (server, cached)**
 - `products.ts` — product/category reads wrapped in `unstable_cache` (5 min revalidate,
-  tags `products` / `categories`) since catalog data is public and cookie-free.
+  tags `products` / `categories`) since catalog data is public and session-free.
 - `collections.ts`, `regions.ts` — collection reads and the single ID region lookup.
-- `cart.ts` — get/create cart (cart id in a cookie), add/update/remove line items;
-  revalidates the layout so the header badge updates.
-- `checkout.ts` — address + shipping rates, Midtrans payment start, payment status poll,
-  order retrieval (see orders.md).
+
+**`lib/client/*` (browser)**
+- `session.ts` — cart id + pending-order id in `localStorage` (`_medusa_cart_id`,
+  `_medusa_order_id`).
+- `cart.ts` — get/create cart, add/update/remove line items.
+- `checkout.ts` — address + shipping rates, order-first Midtrans payment start, paid
+  poll, order retrieval (see orders.md).
 - `customer.ts`, `addresses.ts` — auth and address book (see auth.md).
 
-## Session cookies (`lib/cookies.ts`)
+**`components/store-provider.tsx`** — client context holding the live cart + customer
+(`useStore()`); `cartReady`/`customerReady` gate skeleton states. Session-dependent UI
+(header account/cart badge via `header-session.tsx`, `cart-view`, `checkout-view`,
+`account-view`, `order-view`) renders client-side inside static page shells, so the
+cart/checkout/account routes build as SSG.
 
-All httpOnly, SameSite=Lax, 1-week: `_medusa_jwt` (customer JWT), `_medusa_cart_id`
-(active cart). Plus `NEXT_LOCALE` (set by proxy.ts, readable client-side).
+## Session state
+
+Browser `localStorage`: `_medusa_cart_id`, `_medusa_order_id` (pending payment), and the
+customer JWT (managed by the Medusa SDK). The only cookie is `NEXT_LOCALE` (set by
+proxy.ts for locale routing).
 
 ## Styling / UI
 

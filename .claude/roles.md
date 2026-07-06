@@ -4,12 +4,12 @@
 
 | Actor | What they can do |
 | --- | --- |
-| Guest | Browse catalog, hold a cart (cookie), check out and pay, view an order confirmation by id. |
+| Guest | Browse catalog, hold a cart (localStorage id), check out and pay, view an order confirmation by id. |
 | Authenticated customer | Everything a guest can, plus `/account` (profile), `/account/addresses` (saved address book), and their carts/orders are linked to their customer record. |
 
-The switch between the two is purely "is there a valid `_medusa_jwt` cookie" — see
-[auth.md](auth.md). There are no permission checks, feature flags, or role fields
-anywhere in this repo; don't add role logic here.
+The switch between the two is purely "does the Medusa SDK hold a valid customer JWT"
+(localStorage) — see [auth.md](auth.md). There are no permission checks, feature flags,
+or role fields anywhere in this repo; don't add role logic here.
 
 ## Where roles actually live
 

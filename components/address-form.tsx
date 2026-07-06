@@ -5,7 +5,7 @@ import {
   createAddress,
   updateAddress,
   type AddressState,
-} from "@/lib/data/addresses";
+} from "@/lib/client/addresses";
 import { useDict } from "@/components/i18n-provider";
 import type { StoreCustomerAddress } from "@/lib/types";
 
@@ -19,9 +19,9 @@ export function AddressForm({
   onDone: () => void;
 }) {
   const dict = useDict();
-  const action = mode === "edit" ? updateAddress : createAddress;
   const [state, formAction, pending] = useActionState<AddressState, FormData>(
-    action,
+    (_prev, formData) =>
+      mode === "edit" ? updateAddress(formData) : createAddress(formData),
     null
   );
 

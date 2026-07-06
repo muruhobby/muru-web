@@ -1,11 +1,12 @@
-import Link from "next/link";
-import { getLocaleFromCookies } from "@/lib/i18n/server";
-import { getDictionary } from "@/lib/i18n/dictionaries";
-import { localePath } from "@/lib/i18n/config";
+"use client";
 
-export default async function NotFound() {
-  const lang = await getLocaleFromCookies();
-  const dict = await getDictionary(lang);
+import { LocalizedLink } from "@/components/localized-link";
+import { useDict } from "@/components/i18n-provider";
+
+// Rendered inside the [lang] layout, so the locale and dictionary come from
+// the I18nProvider — no cookie read needed.
+export default function NotFound() {
+  const dict = useDict();
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-24 text-center">
@@ -13,12 +14,12 @@ export default async function NotFound() {
         {dict.notFound.title}
       </h1>
       <p className="mt-3 text-muted">{dict.notFound.message}</p>
-      <Link
-        href={localePath(lang, "/")}
+      <LocalizedLink
+        href="/"
         className="mt-8 inline-flex rounded-md bg-orange px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-dark"
       >
         {dict.notFound.backHome}
-      </Link>
+      </LocalizedLink>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { I18nProvider } from "@/components/i18n-provider";
+import { StoreProvider } from "@/components/store-provider";
 import { locales, isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { SITE_URL } from "@/lib/i18n/metadata";
@@ -61,10 +62,12 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white">
         <I18nProvider lang={locale} dict={dict}>
-          <AnnouncementBar dict={dict} />
-          <Header dict={dict} lang={locale} />
-          <main className="flex-1">{children}</main>
-          <Footer dict={dict} />
+          <StoreProvider>
+            <AnnouncementBar dict={dict} />
+            <Header dict={dict} lang={locale} />
+            <main className="flex-1">{children}</main>
+            <Footer dict={dict} />
+          </StoreProvider>
         </I18nProvider>
       </body>
     </html>

@@ -1,15 +1,15 @@
-"use server";
+// Checkout flow that runs in the browser against the Medusa store API.
+// Midtrans secrets never touch the frontend: the backend payment provider
+// creates the Snap transaction and hands back only the hosted-payment URL.
 
-import { revalidatePath } from "next/cache";
 import { sdk } from "../medusa";
 import {
-  getAuthHeaders,
   getCartId,
   removeCartId,
   getPendingOrderId,
   setPendingOrderId,
   removePendingOrderId,
-} from "../cookies";
+} from "./session";
 import { getErrorMessage } from "../util";
 import type { StoreCartShippingOption, StoreOrder } from "../types";
 
@@ -43,12 +43,11 @@ export type RatesResult = { options?: ShippingOption[]; error?: string };
 export async function applyAddressAndGetRates(
   input: AddressInput
 ): Promise<RatesResult> {
-  const cartId = await getCartId();
+  const cartId = getCartId();
   if (!cartId) return { error: "Your cart is empty." };
   if (!input.email || !input.first_name || !input.address_1 || !input.city || !input.postal_code) {
     return { error: "Please fill in name, email, address, city and postal code." };
   }
-  const headers = await getAuthHeaders();
   const address = {
     first_name: input.first_name,
     last_name: input.last_name ?? "",
@@ -61,17 +60,15 @@ export async function applyAddressAndGetRates(
   };
 
   try {
-    await sdk.store.cart.update(
-      cartId,
-      { email: input.email, shipping_address: address, billing_address: address },
-      {},
-      headers
-    );
+    await sdk.store.cart.update(cartId, {
+      email: input.email,
+      shipping_address: address,
+      billing_address: address,
+    });
 
-    const { shipping_options } = await sdk.store.fulfillment.listCartOptions(
-      { cart_id: cartId },
-      headers
-    );
+    const { shipping_options } = await sdk.store.fulfillment.listCartOptions({
+      cart_id: cartId,
+    });
 
     if (!shipping_options?.length) {
       return { error: "No shipping options available for this address." };
@@ -95,9 +92,7 @@ export async function applyAddressAndGetRates(
         try {
           const { shipping_option } = await sdk.store.fulfillment.calculate(
             o.id,
-            { cart_id: cartId },
-            {},
-            headers
+            { cart_id: cartId }
           );
           base.amount =
             shipping_option?.calculated_price?.calculated_amount ??
@@ -140,30 +135,20 @@ export async function applyAddressAndGetRates(
 export async function startPayment(
   optionId: string
 ): Promise<{ redirectUrl?: string; error?: string }> {
-  const cartId = await getCartId();
+  const cartId = getCartId();
   if (!cartId) return { error: "Your cart is empty." };
   if (!optionId) return { error: "Please choose a shipping method." };
-  const headers = await getAuthHeaders();
 
   try {
-    await sdk.store.cart.addShippingMethod(
-      cartId,
-      { option_id: optionId },
-      {},
-      headers
-    );
+    await sdk.store.cart.addShippingMethod(cartId, { option_id: optionId });
 
-    const { cart } = await sdk.store.cart.retrieve(
-      cartId,
-      { fields: "*payment_collection" },
-      headers
-    );
+    const { cart } = await sdk.store.cart.retrieve(cartId, {
+      fields: "*payment_collection",
+    });
 
     const { payment_collection } = await sdk.store.payment.initiatePaymentSession(
       cart,
-      { provider_id: MIDTRANS_PROVIDER_ID },
-      {},
-      headers
+      { provider_id: MIDTRANS_PROVIDER_ID }
     );
 
     const session =
@@ -179,16 +164,15 @@ export async function startPayment(
 
     // Create the order now, before the redirect. The Midtrans provider
     // authorizes pending transactions, so completion succeeds pre-payment.
-    const result = await sdk.store.cart.complete(cartId, {}, headers);
+    const result = await sdk.store.cart.complete(cartId);
     if (result.type !== "order") {
       return {
         error: result.error?.message || "Could not place the order. Please try again.",
       };
     }
 
-    await removeCartId();
-    await setPendingOrderId(result.order.id);
-    revalidatePath("/[lang]", "layout");
+    removeCartId();
+    setPendingOrderId(result.order.id);
     return { redirectUrl };
   } catch (e: unknown) {
     return {
@@ -200,17 +184,17 @@ export async function startPayment(
 type CheckoutStatus = { status: string; order_id?: string; paid?: boolean };
 
 /**
- * Polled by the processing page's "Verify payment" button. The order already
- * exists (created before the Midtrans redirect); this asks the backend whether
- * its payment has been captured yet (the settlement webhook does that). Once
- * paid, clears the pending-order cookie and returns the order id so the client
- * can redirect to the confirmation page.
+ * Polled by the processing page. The order already exists (created before the
+ * Midtrans redirect); this asks the backend whether its payment has been
+ * captured yet (the settlement webhook does that). Once paid, clears the
+ * pending-order id and returns the order id so the client can redirect to the
+ * confirmation page.
  */
 export async function checkPaymentStatus(): Promise<{
   orderId?: string;
   pending?: boolean;
 }> {
-  const orderId = await getPendingOrderId();
+  const orderId = getPendingOrderId();
   if (orderId) {
     try {
       const result = await sdk.client.fetch<CheckoutStatus>(
@@ -218,7 +202,7 @@ export async function checkPaymentStatus(): Promise<{
         { query: { order_id: orderId } }
       );
       if (result.order_id && result.paid) {
-        await removePendingOrderId();
+        removePendingOrderId();
         return { orderId: result.order_id };
       }
     } catch {
@@ -228,8 +212,8 @@ export async function checkPaymentStatus(): Promise<{
   }
 
   // Fallback for payments started before the order-first flow, where the cart
-  // cookie survived the redirect and the webhook creates the order.
-  const cartId = await getCartId();
+  // id survived the redirect and the webhook creates the order.
+  const cartId = getCartId();
   if (!cartId) return { pending: true };
   try {
     const result = await sdk.client.fetch<CheckoutStatus>(
@@ -237,7 +221,7 @@ export async function checkPaymentStatus(): Promise<{
       { query: { cart_id: cartId } }
     );
     if (result.order_id && result.paid !== false) {
-      await removeCartId();
+      removeCartId();
       return { orderId: result.order_id };
     }
   } catch {
@@ -247,16 +231,11 @@ export async function checkPaymentStatus(): Promise<{
 }
 
 export async function getOrder(orderId: string): Promise<StoreOrder | null> {
-  const headers = await getAuthHeaders();
   try {
-    const { order } = await sdk.store.order.retrieve(
-      orderId,
-      {
-        fields:
-          "*items,*shipping_address,*shipping_methods,+email,+total,+currency_code,+display_id",
-      },
-      headers
-    );
+    const { order } = await sdk.store.order.retrieve(orderId, {
+      fields:
+        "*items,*shipping_address,*shipping_methods,+email,+total,+currency_code,+display_id",
+    });
     return order;
   } catch {
     return null;

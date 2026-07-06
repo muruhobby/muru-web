@@ -5,7 +5,7 @@ import {
   applyAddressAndGetRates,
   startPayment,
   type ShippingOption,
-} from "@/lib/data/checkout";
+} from "@/lib/client/checkout";
 import { formatIDR } from "@/lib/util";
 import { interpolate } from "@/lib/i18n/config";
 import { useDict } from "@/components/i18n-provider";
@@ -97,7 +97,9 @@ export function CheckoutClient({
       if (res.error) {
         setError(res.error);
       } else if (res.redirectUrl) {
-        // Leave the site for the Midtrans hosted payment page.
+        // The cart was completed into an order (its id is already cleared from
+        // localStorage). Leave the site for the Midtrans hosted payment page —
+        // the in-memory cart is dropped on the next mount.
         window.location.href = res.redirectUrl;
       }
     });

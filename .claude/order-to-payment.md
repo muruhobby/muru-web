@@ -8,7 +8,8 @@ Verified end-to-end against the Midtrans sandbox (BCA VA settlement) on 2026-07-
 
 Cast:
 
-- **Storefront** — Next.js server actions in `muru-web/lib/data/checkout.ts`.
+- **Storefront** — browser-side calls in `muru-web/lib/client/checkout.ts` (the
+  storefront talks to the Medusa store API directly from the browser).
 - **Backend** — Medusa v2 + the Midtrans payment provider (`muru-cms/src/modules/midtrans`).
 - **Midtrans** — Snap (hosted payment page) + Core API (status/refund) + webhook notifications.
 
@@ -24,7 +25,7 @@ startPayment(optionId)
   │                       ◄── { token, redirect_url } ────────┘
   ├─ cart.complete ──────► authorize session (provider: pending ⇒ "authorized")
   │                       ⇒ ORDER exists, payment Authorized (unpaid)
-  ├─ clear cart cookie, set _medusa_order_id cookie
+  ├─ clear cart id, set _medusa_order_id   (localStorage)
   ◄─ redirect_url
 window.location = redirect_url ─────────────────────────────► customer pays on hosted page
                                                                ├─ webhook (settlement) ──► POST /hooks/payment/midtrans_midtrans
@@ -37,12 +38,13 @@ window.location = redirect_url ────────────────�
 /checkout/processing
   └─ poll checkPaymentStatus ─► GET /store/checkout/status?order_id
                           ◄─ { order_id, paid: true } once captured
-clear order cookie → /order/[id]
+clear pending-order id → /order/[id]
 ```
 
 ## Phase 0 — prerequisites (already true before checkout)
 
-1. Cart exists (id in the `_medusa_cart_id` httpOnly cookie), region = Indonesia (IDR).
+1. Cart exists (id in the browser's `localStorage` as `_medusa_cart_id`), region =
+   Indonesia (IDR). All storefront session calls run in the browser (`lib/client/*`).
 2. Checkout page saved the address (shipping + billing, `country_code: "id"`) and email
    onto the cart, then listed shipping options; Biteship options are
    `price_type: "calculated"` and were priced per-option via the calculate endpoint
@@ -70,10 +72,10 @@ clear order cookie → /order/[id]
    `authorizePayment` checks the live Midtrans status and maps *pending / not-yet-charged*
    to **authorized** (that's the order-first enabler). The result: an order with
    payment **Authorized** (awaiting payment), fulfillment not started.
-5. The storefront clears the cart cookie, stores the order id in the httpOnly
-   `_medusa_order_id` cookie (1 day) so the processing page can find it, and only then
-   sends the browser to `redirect_url`. If completion fails, the customer stays on
-   checkout with an error — no redirect.
+5. The storefront clears the cart id and stores the order id as `_medusa_order_id`
+   (both in `localStorage`) so the processing page can find it, and only then sends the
+   browser to `redirect_url`. If completion fails, the customer stays on checkout with
+   an error — no redirect.
 
 ## Phase 2 — customer pays on Midtrans
 
@@ -123,18 +125,19 @@ unpaid until the auto-cancel job sweeps it. Snap transactions expire after ~24h 
 
 1. `/checkout/processing` mounts `VerifyPayment`: auto-polls every 4s (max ~2 min) plus
    a manual "I've paid — verify payment" button.
-2. Each poll: server action `checkPaymentStatus()` reads the `_medusa_order_id` cookie →
+2. Each poll: `checkPaymentStatus()` (browser) reads `_medusa_order_id` from
+   `localStorage` →
    backend `GET /store/checkout/status?order_id=…` → looks up the order's payment
    collections (read-only) → `{status:"completed", order_id, paid: boolean}`. (The
    endpoint also still accepts `cart_id`, resolved through the `order_cart` link, for
    payments started before the order-first flow.)
-3. On `paid: true`: the action deletes the order cookie and the client `router.replace`s
+3. On `paid: true`: it deletes the pending-order id and `router.replace`s
    to `/order/{order_id}` — the confirmation page (items, address, totals via `getOrder`).
 
 If the customer closed the tab after paying: the webhook still captures; the order was
 already theirs. If they never pay: the Snap transaction expires (~24h), and the hourly
 `cancel-unpaid-orders` job cancels the order after `UNPAID_ORDER_CANCEL_HOURS` (default
-48h); the cart cookie is already gone, so their next visit starts a fresh cart.
+48h); the stored cart id is already gone, so their next visit starts a fresh cart.
 
 ## Phase 5 — after the order (admin)
 

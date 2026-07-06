@@ -11,6 +11,14 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { buildAlternates } from "@/lib/i18n/metadata";
 
+// ISR: rendered on first request, then served statically and refreshed in the
+// background at most every 5 minutes.
+export const revalidate = 300;
+
+export function generateStaticParams(): { handle: string }[] {
+  return [];
+}
+
 export async function generateMetadata({
   params,
 }: {

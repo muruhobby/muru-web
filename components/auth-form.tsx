@@ -1,20 +1,58 @@
 "use client";
 
-import { useActionState } from "react";
-import { login, signup, type AuthState } from "@/lib/data/customer";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { login, signup } from "@/lib/client/customer";
 import { LocalizedLink } from "./localized-link";
-import { useDict } from "@/components/i18n-provider";
+import { useStore } from "@/components/store-provider";
+import { localePath } from "@/lib/i18n/config";
+import { useDict, useLang } from "@/components/i18n-provider";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const dict = useDict();
-  const action = mode === "login" ? login : signup;
-  const [state, formAction, pending] = useActionState<AuthState, FormData>(
-    action,
-    null
-  );
+  const lang = useLang();
+  const router = useRouter();
+  const { customer, customerReady, refreshCustomer } = useStore();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  // Already signed in (or just signed in below) — go to the account page.
+  useEffect(() => {
+    if (customerReady && customer) {
+      router.replace(localePath(lang, "/account"));
+    }
+  }, [customerReady, customer, router, lang]);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    setError(null);
+    setPending(true);
+    const result =
+      mode === "login"
+        ? await login(email, password)
+        : await signup({
+            email,
+            password,
+            first_name: String(formData.get("first_name") || "").trim(),
+            last_name: String(formData.get("last_name") || "").trim(),
+          });
+
+    if (result.error) {
+      setError(result.error);
+      setPending(false);
+      return;
+    }
+    // Updating the customer triggers the redirect effect above; keep the
+    // button disabled until navigation happens.
+    await refreshCustomer();
+  }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {mode === "register" && (
         <div className="grid grid-cols-2 gap-3">
           <Field name="first_name" label={dict.auth.firstName} />
@@ -24,9 +62,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <Field name="email" label={dict.auth.email} type="email" />
       <Field name="password" label={dict.auth.password} type="password" />
 
-      {state?.error && (
+      {error && (
         <p className="rounded-md bg-orange/10 px-3 py-2 text-sm text-orange-dark">
-          {state.error}
+          {error}
         </p>
       )}
 

@@ -14,6 +14,10 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { buildAlternates } from "@/lib/i18n/metadata";
 
+// Static page, re-rendered in the background at most every 5 minutes —
+// matches the catalog data cache in lib/data.
+export const revalidate = 300;
+
 export async function generateMetadata({
   params,
 }: {

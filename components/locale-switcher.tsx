@@ -7,6 +7,10 @@ import { useLang } from "./i18n-provider";
 
 const WEEK = 60 * 60 * 24 * 7;
 
+function persist(locale: Locale) {
+  document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=${WEEK};samesite=lax`;
+}
+
 export function LocaleSwitcher() {
   const current = useLang();
   const pathname = usePathname();
@@ -15,10 +19,6 @@ export function LocaleSwitcher() {
   const segments = pathname.split("/");
   const rest = isLocale(segments[1]) ? "/" + segments.slice(2).join("/") : pathname;
   const cleanRest = rest === "/" ? "" : rest.replace(/\/$/, "");
-
-  function persist(locale: Locale) {
-    document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=${WEEK};samesite=lax`;
-  }
 
   return (
     <div className="flex items-center gap-1 text-xs font-bold">

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { checkPaymentStatus } from "@/lib/data/checkout";
+import { checkPaymentStatus } from "@/lib/client/checkout";
 import { localePath } from "@/lib/i18n/config";
 import { useDict, useLang } from "@/components/i18n-provider";
 

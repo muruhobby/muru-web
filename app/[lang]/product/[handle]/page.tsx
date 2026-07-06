@@ -9,6 +9,16 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { buildAlternates } from "@/lib/i18n/metadata";
 
+// ISR: each product page is rendered on first request, then served statically
+// and refreshed in the background at most every 5 minutes.
+export const revalidate = 300;
+
+export function generateStaticParams(): { handle: string }[] {
+  // No prerender at build time (the Medusa backend may not be running);
+  // pages are generated on demand and cached.
+  return [];
+}
+
 export async function generateMetadata({
   params,
 }: {

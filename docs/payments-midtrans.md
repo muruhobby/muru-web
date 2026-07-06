@@ -25,7 +25,7 @@ muru-web: Confirm & pay
       → [muru-cms] provider.initiatePayment(): Snap create (SERVER KEY)
         → returns redirect_url in the payment session `data`
   → cart.complete() → ORDER created now (provider authorizes pending txns)
-        clear cart cookie, remember order id in _medusa_order_id cookie
+        clear cart id, remember order id (_medusa_order_id, localStorage)
   → storefront redirects customer to Midtrans hosted page
   → customer pays (card instantly / QRIS-VA later)
        ├─ Midtrans webhook → POST /hooks/payment/midtrans_midtrans   [muru-cms, built-in]
@@ -34,7 +34,7 @@ muru-web: Confirm & pay
        └─ Midtrans redirect → muru-web /checkout/processing  ("processing" + Verify button)
              Verify/poll → checkPaymentStatus() → GET /store/checkout/status?order_id [muru-cms]
                             → { order_id, paid: true } once the webhook captured it
-             paid → clear order cookie → /order/[id]
+             paid → clear pending-order id → /order/[id]
 Admin refund → provider.refundPayment() → Midtrans refund API
 ```
 
@@ -65,7 +65,7 @@ then auto-cancels any order still unpaid after `UNPAID_ORDER_CANCEL_HOURS` (defa
 **Storefront (`muru-web`)**
 | File | Role |
 | --- | --- |
-| `lib/data/checkout.ts` | `startPayment` (initiate session → complete cart → **order created** → `redirect_url`), `checkPaymentStatus` (poll paid status by order id). |
+| `lib/client/checkout.ts` | Browser-side: `startPayment` (initiate session → complete cart → **order created** → `redirect_url`), `checkPaymentStatus` (poll paid status by order id, from localStorage). |
 | `app/[lang]/checkout/processing/page.tsx` | Processing / failed UI. |
 | `components/verify-payment.tsx` | "I've paid — verify payment" button + auto-poll → redirect to `/order/[id]`. |
 

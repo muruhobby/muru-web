@@ -34,7 +34,8 @@ cross-repo payment lifecycle). Payment integration details: `docs/payments-midtr
 | `/checkout` | Address form → live courier rates → confirm & pay (see orders.md). |
 | `/checkout/processing` | Post-payment landing; polls until the order exists. |
 | `/order/[id]` | Order confirmation. |
-| `/account`, `/account/login`, `/account/register`, `/account/addresses` | Customer area (see auth.md). |
+| `/account`, `/account/addresses`, `/account/orders`, `/account/wishlist` | Customer dashboard — sidebar shell (`account-shell.tsx` via the `(dashboard)` route group layout) around profile settings, address book, order history, and wishlist. |
+| `/account/login`, `/account/register` | Auth pages, outside the dashboard shell (see auth.md). |
 
 ## Data layer — server catalog vs browser session
 
@@ -53,7 +54,10 @@ against the Medusa store API.
 - `cart.ts` — get/create cart, add/update/remove line items.
 - `checkout.ts` — address + shipping rates, order-first Midtrans payment start, paid
   poll, order retrieval (see orders.md).
-- `customer.ts`, `addresses.ts` — auth and address book (see auth.md).
+- `customer.ts`, `addresses.ts` — auth, profile updates, and address book (see auth.md).
+- `orders.ts` — customer order history + the single display status derived per order.
+- `wishlist.ts` — product ids stored in the customer's `metadata.wishlist` (no backend
+  wishlist module), resolved to priced products for the wishlist page.
 
 **`components/store-provider.tsx`** — client context holding the live cart + customer
 (`useStore()`); `cartReady`/`customerReady` gate skeleton states. Session-dependent UI

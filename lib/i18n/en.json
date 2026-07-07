@@ -171,11 +171,6 @@
   "account": {
     "eyebrow": "My account",
     "greeting": "Hi, {name}",
-    "email": "Email",
-    "name": "Name",
-    "nameFallback": "—",
-    "addressBook": "Address book",
-    "continueShopping": "Continue shopping",
     "signOut": "Sign out",
     "loginBackToShop": "← Back to shop",
     "loginTitle": "Welcome back",
@@ -183,9 +178,45 @@
     "registerBackToShop": "← Back to shop",
     "registerTitle": "Join Muru",
     "registerSubtitle": "Create an account to track orders and claim 15% off your first build.",
-    "addressesBack": "← Account",
     "addressesTitle": "Address book",
-    "addressesSubtitle": "Saved addresses can be selected at checkout to calculate shipping."
+    "addressesSubtitle": "Saved addresses can be selected at checkout to calculate shipping.",
+    "nav": {
+      "settings": "Account Settings",
+      "addresses": "Address Book",
+      "orders": "Order History",
+      "wishlist": "Wishlist"
+    },
+    "settings": {
+      "title": "Account Settings",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Saved ✓"
+    },
+    "orders": {
+      "title": "Order History",
+      "empty": "No orders yet — your purchases will show up here.",
+      "browse": "Browse products",
+      "moreItems": "+ {count} more",
+      "loadMore": "Load more",
+      "loading": "Loading…",
+      "status": {
+        "delivered": "Delivered",
+        "shipped": "Shipped",
+        "processing": "Processing",
+        "awaitingPayment": "Awaiting payment",
+        "canceled": "Canceled"
+      }
+    },
+    "wishlist": {
+      "title": "Wishlist",
+      "empty": "Your wishlist is empty — tap the heart on any product to save it.",
+      "browse": "Browse products",
+      "remove": "Remove from wishlist"
+    }
   },
   "auth": {
     "firstName": "First name",
@@ -233,5 +264,9 @@
     "title": "Page not found",
     "message": "The page you're looking for doesn't exist or has moved.",
     "backHome": "Back to home"
+  },
+  "wishlist": {
+    "save": "Wishlist",
+    "saved": "Saved"
   }
 }

@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { AddToCartButton } from "./add-to-cart-button";
 import { LocalizedLink } from "./localized-link";
+import { WishlistButton } from "./wishlist-button";
 import { formatIDR } from "@/lib/util";
 import { interpolate } from "@/lib/i18n/config";
 import { useDict } from "@/components/i18n-provider";
 import type { StoreProductVariant } from "@/lib/types";
 
 export function ProductPurchase({
+  productId,
   variants,
 }: {
+  productId: string;
   variants: StoreProductVariant[];
 }) {
   const dict = useDict();
@@ -50,7 +53,7 @@ export function ProductPurchase({
         </div>
       )}
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8 flex flex-wrap gap-3">
         <AddToCartButton
           variantId={selected?.id ?? null}
           className="px-8 py-3.5"
@@ -61,6 +64,7 @@ export function ProductPurchase({
         >
           {dict.productPurchase.viewCart}
         </LocalizedLink>
+        <WishlistButton productId={productId} />
       </div>
 
       {selected?.sku && (

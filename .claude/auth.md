@@ -35,8 +35,9 @@ then refreshes the shared session state (`useStore().refreshCustomer()`).
 ## Route protection
 
 There is no middleware-level guard and no server-side check. Account views render
-client-side: `account-view.tsx` / the addresses view wait for `customerReady` and
-`router.replace` to `/account/login` when there's no customer. Everything else
+client-side: `account-shell.tsx` (the `(dashboard)` route-group layout around all
+`/account/*` pages except login/register) waits for `customerReady` and
+`router.replace`s to `/account/login` when there's no customer. Everything else
 (catalog, cart, checkout) is public.
 
 ## Guest vs logged-in

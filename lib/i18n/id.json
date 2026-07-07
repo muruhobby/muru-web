@@ -171,11 +171,6 @@
   "account": {
     "eyebrow": "Akun saya",
     "greeting": "Hai, {name}",
-    "email": "Email",
-    "name": "Nama",
-    "nameFallback": "—",
-    "addressBook": "Buku alamat",
-    "continueShopping": "Lanjut belanja",
     "signOut": "Keluar",
     "loginBackToShop": "← Kembali ke toko",
     "loginTitle": "Selamat datang kembali",
@@ -183,9 +178,45 @@
     "registerBackToShop": "← Kembali ke toko",
     "registerTitle": "Gabung Muru",
     "registerSubtitle": "Buat akun untuk melacak pesanan dan klaim diskon 15% untuk pembelian pertama.",
-    "addressesBack": "← Akun",
     "addressesTitle": "Buku alamat",
-    "addressesSubtitle": "Alamat tersimpan dapat dipilih saat checkout untuk menghitung ongkir."
+    "addressesSubtitle": "Alamat tersimpan dapat dipilih saat checkout untuk menghitung ongkir.",
+    "nav": {
+      "settings": "Pengaturan akun",
+      "addresses": "Buku alamat",
+      "orders": "Riwayat pesanan",
+      "wishlist": "Wishlist"
+    },
+    "settings": {
+      "title": "Pengaturan akun",
+      "firstName": "Nama depan",
+      "lastName": "Nama belakang",
+      "email": "Email",
+      "phone": "Telepon",
+      "save": "Simpan perubahan",
+      "saving": "Menyimpan…",
+      "saved": "Tersimpan ✓"
+    },
+    "orders": {
+      "title": "Riwayat pesanan",
+      "empty": "Belum ada pesanan — pembelian Anda akan muncul di sini.",
+      "browse": "Jelajahi produk",
+      "moreItems": "+ {count} lainnya",
+      "loadMore": "Muat lainnya",
+      "loading": "Memuat…",
+      "status": {
+        "delivered": "Diterima",
+        "shipped": "Dikirim",
+        "processing": "Diproses",
+        "awaitingPayment": "Menunggu pembayaran",
+        "canceled": "Dibatalkan"
+      }
+    },
+    "wishlist": {
+      "title": "Wishlist",
+      "empty": "Wishlist Anda masih kosong — ketuk tanda hati pada produk untuk menyimpannya.",
+      "browse": "Jelajahi produk",
+      "remove": "Hapus dari wishlist"
+    }
   },
   "auth": {
     "firstName": "Nama depan",
@@ -233,5 +264,9 @@
     "title": "Halaman tidak ditemukan",
     "message": "Halaman yang Anda cari tidak ada atau telah dipindahkan.",
     "backHome": "Kembali ke beranda"
+  },
+  "wishlist": {
+    "save": "Wishlist",
+    "saved": "Tersimpan"
   }
 }

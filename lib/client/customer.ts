@@ -78,6 +78,24 @@ export async function signup(input: {
   return {};
 }
 
+export async function updateProfile(input: {
+  first_name: string;
+  last_name: string;
+  phone: string;
+}): Promise<AuthResult> {
+  if (!input.first_name) return { error: "First name is required." };
+  try {
+    await sdk.store.customer.update({
+      first_name: input.first_name,
+      last_name: input.last_name || null,
+      phone: input.phone || null,
+    });
+  } catch (e: unknown) {
+    return { error: getErrorMessage(e, "Could not save your details.") };
+  }
+  return {};
+}
+
 export async function logout(): Promise<void> {
   try {
     await sdk.auth.logout();

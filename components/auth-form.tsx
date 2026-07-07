@@ -1,25 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { login, signup } from "@/lib/client/customer";
+import { reconcileCartAfterAuth } from "@/lib/client/cart";
 import { LocalizedLink } from "./localized-link";
 import { useStore } from "@/components/store-provider";
 import { localePath } from "@/lib/i18n/config";
 import { useDict, useLang } from "@/components/i18n-provider";
 
+/**
+ * Where to go after signing in: the page's `?next=` param when it's an
+ * internal path (e.g. the checkout gate passes `/checkout`), else the account
+ * page. Read from window at navigation time — using useSearchParams would
+ * suspend these otherwise-static pages.
+ */
+function nextPath(): string {
+  const next =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//")
+    ? next
+    : "/account";
+}
+
+// The query string never changes while the form is mounted (navigation
+// remounts it), so there's nothing to subscribe to.
+function subscribeNever() {
+  return () => {};
+}
+
+function readNextQuery(): string {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next ? `?next=${encodeURIComponent(next)}` : "";
+}
+
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const dict = useDict();
   const lang = useLang();
   const router = useRouter();
-  const { customer, customerReady, refreshCustomer } = useStore();
+  const { customer, customerReady, refreshCart, refreshCustomer } = useStore();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Carried onto the login/register cross-links so the destination survives
+  // switching forms. Read from the URL after hydration — the static shell is
+  // prerendered without one (useSearchParams would suspend the whole page).
+  const nextQuery = useSyncExternalStore(
+    subscribeNever,
+    readNextQuery,
+    () => ""
+  );
 
-  // Already signed in (or just signed in below) — go to the account page.
+  // Already signed in (or just signed in below) — leave the auth page.
   useEffect(() => {
     if (customerReady && customer) {
-      router.replace(localePath(lang, "/account"));
+      router.replace(localePath(lang, nextPath()));
     }
   }, [customerReady, customer, router, lang]);
 
@@ -46,6 +82,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setPending(false);
       return;
     }
+    // Join any cart remembered on the account into the one built as a guest
+    // before the header/checkout re-render from the refreshed session.
+    await reconcileCartAfterAuth();
+    await refreshCart();
     // Updating the customer triggers the redirect effect above; keep the
     // button disabled until navigation happens.
     await refreshCustomer();
@@ -85,7 +125,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <>
             {dict.auth.noAccount}
             <LocalizedLink
-              href="/account/register"
+              href={`/account/register${nextQuery}`}
               className="font-semibold text-orange"
             >
               {dict.auth.createOne}
@@ -95,7 +135,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <>
             {dict.auth.haveAccount}
             <LocalizedLink
-              href="/account/login"
+              href={`/account/login${nextQuery}`}
               className="font-semibold text-orange"
             >
               {dict.auth.signInLink}

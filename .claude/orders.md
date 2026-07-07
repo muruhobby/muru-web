@@ -14,8 +14,10 @@ test steps are in `docs/payments-midtrans.md`.
 - `addToCart` / `updateLineItem` / `removeLineItem` mutate lines; quantity ≤ 0 deletes.
   Each returns the fresh cart, which `StoreProvider` puts in context — the header badge
   and cart view re-render from `useStore()`.
-- Carts are guest-capable; if the customer is logged in, the SDK's JWT links the cart
-  to them.
+- Carts are guest-capable, but completing checkout requires an account (`/checkout`
+  gates signed-out visitors). `reconcileCartAfterAuth()` runs after login/signup: it
+  merges the cart remembered on the customer record (`customer.metadata.cart_id`) into
+  the local cart, transfers ownership, and remembers the merged cart.
 
 ## 2. Address → live courier rates (`applyAddressAndGetRates` in `lib/client/checkout.ts`)
 

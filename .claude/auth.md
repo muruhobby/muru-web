@@ -42,10 +42,17 @@ client-side: `account-shell.tsx` (the `(dashboard)` route-group layout around al
 
 ## Guest vs logged-in
 
-Guest checkout is fully supported: the cart id lives in `localStorage`
-(`lib/client/session.ts`) without auth, and checkout sets the email on the cart
-directly. Logging in attaches the customer to carts/orders via the SDK's Bearer header
-and unlocks the saved address book (`lib/client/addresses.ts`; guests get `[]`).
+Guests can browse and build a cart (the cart id lives in `localStorage`,
+`lib/client/session.ts`), but **checkout requires an account**: `/checkout` shows an
+auth gate to signed-out visitors, whose Create account / Sign in links carry
+`?next=/checkout` so the customer lands back on checkout after authenticating.
+
+On login/signup, `reconcileCartAfterAuth()` (`lib/client/cart.ts`) keeps the guest
+cart, joins in the open cart remembered on the customer record
+(`customer.metadata.cart_id`, written whenever a signed-in customer gets a new cart),
+hands ownership to the customer via `transferCart`, and remembers the result — so
+carts survive sign-in and follow the account across devices. Logged-in customers also
+get the saved address book (`lib/client/addresses.ts`; guests get `[]`).
 
 ## Gotchas
 

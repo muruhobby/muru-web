@@ -128,8 +128,13 @@
     "title": "Checkout",
     "signedInAs": "Masuk sebagai {email}.",
     "manageAddresses": "Kelola alamat",
-    "signIn": "Masuk",
-    "signInSuffix": "untuk memakai alamat tersimpan Anda.",
+    "gate": {
+      "message": "Kami mewajibkan akun untuk setiap pesanan agar Anda bisa melacak pengiriman, mengatur pengembalian, dan memesan ulang favorit dengan lebih cepat. Hanya butuh satu menit.",
+      "createAccount": "Buat akun",
+      "signIn": "Masuk",
+      "cartSaved": "Keranjang Anda tersimpan —",
+      "backToCart": "kembali ke keranjang"
+    },
     "yourOrder": "Pesanan Anda",
     "qty": "Jml {qty}",
     "subtotal": "Subtotal",

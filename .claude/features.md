@@ -31,7 +31,7 @@ cross-repo payment lifecycle). Payment integration details: `docs/payments-midtr
 | `/search` | Product search (`q` param → Medusa `q` filter). |
 | `/product/[handle]` | Product detail; variant picker (`product-purchase.tsx`). |
 | `/cart` | Cart lines, quantity edit/remove. |
-| `/checkout` | Address form → live courier rates → confirm & pay (see orders.md). |
+| `/checkout` | Requires an account (auth gate for guests; carts merge on sign-in) → address form → live courier rates → confirm & pay (see orders.md). |
 | `/checkout/processing` | Post-payment landing; polls until the order exists. |
 | `/order/[id]` | Order confirmation. |
 | `/account`, `/account/addresses`, `/account/orders`, `/account/wishlist` | Customer dashboard — sidebar shell (`account-shell.tsx` via the `(dashboard)` route group layout) around profile settings, address book, order history, and wishlist. |

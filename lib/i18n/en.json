@@ -128,8 +128,13 @@
     "title": "Checkout",
     "signedInAs": "Signed in as {email}.",
     "manageAddresses": "Manage addresses",
-    "signIn": "Sign in",
-    "signInSuffix": "to use your saved addresses.",
+    "gate": {
+      "message": "We require an account for every order so you can track shipping, manage returns, and reorder favorites faster. It only takes a minute.",
+      "createAccount": "Create account",
+      "signIn": "Sign in",
+      "cartSaved": "Your cart is saved —",
+      "backToCart": "back to cart"
+    },
     "yourOrder": "Your order",
     "qty": "Qty {qty}",
     "subtotal": "Subtotal",

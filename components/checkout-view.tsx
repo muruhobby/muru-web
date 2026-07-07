@@ -52,6 +52,45 @@ export function CheckoutView() {
     );
   }
 
+  // Orders require an account (they're tied to the customer for tracking,
+  // returns, history). The cart stays in localStorage and is joined with any
+  // cart remembered on the account after sign-in (reconcileCartAfterAuth).
+  if (!customer) {
+    return (
+      <div className="mx-auto max-w-xl px-5 py-24 text-center">
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-orange/10 text-2xl">
+          <span aria-hidden>🔒</span>
+        </div>
+        <p className="mt-8 leading-relaxed text-ink-soft">
+          {dict.checkout.gate.message}
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <LocalizedLink
+            href="/account/register?next=/checkout"
+            className="rounded-md bg-orange px-6 py-3 text-sm font-bold text-white hover:bg-orange-dark"
+          >
+            {dict.checkout.gate.createAccount}
+          </LocalizedLink>
+          <LocalizedLink
+            href="/account/login?next=/checkout"
+            className="rounded-md border border-line bg-white px-6 py-3 text-sm font-bold hover:border-ink"
+          >
+            {dict.checkout.gate.signIn}
+          </LocalizedLink>
+        </div>
+        <p className="mt-6 text-sm text-muted">
+          {dict.checkout.gate.cartSaved}{" "}
+          <LocalizedLink
+            href="/cart"
+            className="font-semibold text-orange hover:text-orange-dark"
+          >
+            {dict.checkout.gate.backToCart}
+          </LocalizedLink>
+        </p>
+      </div>
+    );
+  }
+
   const subtotal = cart?.item_total ?? 0;
 
   return (
@@ -59,27 +98,15 @@ export function CheckoutView() {
       <h1 className="text-3xl font-extrabold tracking-tight">
         {dict.checkout.title}
       </h1>
-      {customer ? (
-        <p className="mt-2 text-sm text-muted">
-          {interpolate(dict.checkout.signedInAs, { email: customer.email })}{" "}
-          <LocalizedLink
-            href="/account/addresses"
-            className="font-semibold text-orange"
-          >
-            {dict.checkout.manageAddresses}
-          </LocalizedLink>
-        </p>
-      ) : (
-        <p className="mt-2 text-sm text-muted">
-          <LocalizedLink
-            href="/account/login"
-            className="font-semibold text-orange"
-          >
-            {dict.checkout.signIn}
-          </LocalizedLink>{" "}
-          {dict.checkout.signInSuffix}
-        </p>
-      )}
+      <p className="mt-2 text-sm text-muted">
+        {interpolate(dict.checkout.signedInAs, { email: customer.email })}{" "}
+        <LocalizedLink
+          href="/account/addresses"
+          className="font-semibold text-orange"
+        >
+          {dict.checkout.manageAddresses}
+        </LocalizedLink>
+      </p>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
         <div>

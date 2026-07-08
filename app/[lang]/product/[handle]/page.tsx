@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProductByHandle } from "@/lib/data/products";
+import { ProductGallery } from "@/components/product-gallery";
 import { ProductPurchase } from "@/components/product-purchase";
 import { LocalizedLink } from "@/components/localized-link";
-import { getProductImage, getProductMeta } from "@/lib/util";
+import { getProductMeta } from "@/lib/util";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { buildAlternates } from "@/lib/i18n/metadata";
@@ -46,7 +46,9 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const { badge, categoryLabel, emoji } = getProductMeta(product);
-  const image = getProductImage(product);
+  const images = (product.images ?? [])
+    .map((img) => img.url)
+    .filter((url): url is string => Boolean(url));
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
@@ -55,25 +57,12 @@ export default async function ProductPage({
       </LocalizedLink>
 
       <div className="mt-6 grid gap-10 lg:grid-cols-2">
-        <div className="grid-bg relative grid h-[420px] place-items-center overflow-hidden rounded-2xl border border-line">
-          {badge && (
-            <span className="eyebrow absolute left-4 top-4 z-10 rounded bg-orange px-2 py-1 text-white">
-              {badge}
-            </span>
-          )}
-          {image ? (
-            <Image
-              src={image}
-              alt={product.title ?? ""}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-              className="object-contain p-6"
-            />
-          ) : (
-            <span className="text-[10rem] leading-none">{emoji}</span>
-          )}
-        </div>
+        <ProductGallery
+          images={images}
+          alt={product.title ?? ""}
+          emoji={emoji}
+          badge={badge}
+        />
 
         <div className="flex flex-col justify-center">
           {categoryLabel && (

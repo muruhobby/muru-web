@@ -40,6 +40,14 @@ body {
   background-size: 28px 28px;
 }
 
+/* Scrollable strips (galleries) that hide their scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

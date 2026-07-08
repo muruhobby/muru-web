@@ -89,7 +89,9 @@
   "product": {
     "backToShop": "← Kembali ke toko",
     "authentic": "✓ 100% asli",
-    "fastDispatch": "✓ Pengiriman cepat"
+    "fastDispatch": "✓ Pengiriman cepat",
+    "prevImage": "Gambar sebelumnya",
+    "nextImage": "Gambar berikutnya"
   },
   "productCard": {
     "add": "Tambah",
@@ -99,11 +101,13 @@
     "variant": "Varian",
     "addToCart": "Tambah ke keranjang",
     "viewCart": "Lihat keranjang",
-    "sku": "SKU: {sku}"
+    "sku": "SKU: {sku}",
+    "soldOut": "Habis"
   },
   "addToCart": {
     "add": "Tambah ke keranjang",
     "unavailable": "Tidak tersedia",
+    "outOfStock": "Stok habis",
     "adding": "Menambahkan…",
     "added": "Ditambahkan ✓"
   },

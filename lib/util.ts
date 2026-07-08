@@ -38,3 +38,19 @@ export function getVariantPrice(product: StoreProduct): number | null {
   const amount = product.variants?.[0]?.calculated_price?.calculated_amount;
   return typeof amount === "number" ? amount : null;
 }
+
+/**
+ * Whether a variant can currently be purchased. Requires the product to be
+ * fetched with the `+variants.inventory_quantity,+variants.manage_inventory,
+ * +variants.allow_backorder` fields; variants without managed inventory are
+ * always in stock.
+ */
+export function isVariantInStock(variant: {
+  manage_inventory?: boolean | null;
+  allow_backorder?: boolean | null;
+  inventory_quantity?: number | null;
+}): boolean {
+  if (!variant.manage_inventory) return true;
+  if (variant.allow_backorder) return true;
+  return (variant.inventory_quantity ?? 0) > 0;
+}

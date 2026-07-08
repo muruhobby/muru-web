@@ -12,7 +12,8 @@ import type {
 } from "../types";
 
 const PRODUCT_FIELDS =
-  "*variants.calculated_price,*categories,+metadata,*images";
+  "*variants.calculated_price,*categories,+metadata,*images," +
+  "+variants.inventory_quantity,+variants.manage_inventory,+variants.allow_backorder";
 
 // Catalog data is public (no cookies/headers) and changes infrequently, so we
 // cache it in Next's data cache to avoid a Medusa round-trip on every

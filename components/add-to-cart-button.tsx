@@ -8,11 +8,14 @@ export function AddToCartButton({
   variantId,
   className = "",
   compact = false,
+  outOfStock = false,
 }: {
   variantId: string | null;
   className?: string;
   /** Use the short "Add" label (e.g. on product cards) instead of "Add to cart". */
   compact?: boolean;
+  /** Render a disabled "Out of stock" button instead of the add action. */
+  outOfStock?: boolean;
 }) {
   const dict = useDict();
   const { addItem } = useStore();
@@ -21,13 +24,13 @@ export function AddToCartButton({
 
   const label = compact ? dict.productCard.add : dict.addToCart.add;
 
-  if (!variantId) {
+  if (!variantId || outOfStock) {
     return (
       <button
         disabled
         className={`cursor-not-allowed rounded-md border border-line px-3 py-2 text-sm font-semibold text-muted ${className}`}
       >
-        {dict.addToCart.unavailable}
+        {outOfStock ? dict.addToCart.outOfStock : dict.addToCart.unavailable}
       </button>
     );
   }

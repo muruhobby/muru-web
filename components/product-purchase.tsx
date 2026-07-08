@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AddToCartButton } from "./add-to-cart-button";
 import { LocalizedLink } from "./localized-link";
 import { WishlistButton } from "./wishlist-button";
-import { formatIDR } from "@/lib/util";
+import { formatIDR, isVariantInStock } from "@/lib/util";
 import { interpolate } from "@/lib/i18n/config";
 import { useDict } from "@/components/i18n-provider";
 import type { StoreProductVariant } from "@/lib/types";
@@ -17,10 +17,13 @@ export function ProductPurchase({
   variants: StoreProductVariant[];
 }) {
   const dict = useDict();
-  const [selectedId, setSelectedId] = useState(variants[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState(
+    (variants.find(isVariantInStock) ?? variants[0])?.id ?? null
+  );
   const selected = variants.find((v) => v.id === selectedId) ?? variants[0];
   const price = selected?.calculated_price?.calculated_amount ?? null;
   const multi = variants.length > 1;
+  const selectedInStock = selected ? isVariantInStock(selected) : false;
 
   return (
     <div>
@@ -35,20 +38,30 @@ export function ProductPurchase({
             <span className="text-ink">{selected?.title ?? "—"}</span>
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {variants.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => setSelectedId(v.id)}
-                className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
-                  selectedId === v.id
-                    ? "border-orange bg-orange/5 text-orange"
-                    : "border-line text-ink-soft hover:border-ink"
-                }`}
-              >
-                {v.title ?? dict.productPurchase.variant}
-              </button>
-            ))}
+            {variants.map((v) => {
+              const inStock = isVariantInStock(v);
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setSelectedId(v.id)}
+                  className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
+                    selectedId === v.id
+                      ? "border-orange bg-orange/5 text-orange"
+                      : inStock
+                        ? "border-line text-ink-soft hover:border-ink"
+                        : "border-dashed border-line text-muted"
+                  }`}
+                >
+                  {v.title ?? dict.productPurchase.variant}
+                  {!inStock && (
+                    <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide">
+                      · {dict.productPurchase.soldOut}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -56,6 +69,7 @@ export function ProductPurchase({
       <div className="mt-8 flex flex-wrap gap-3">
         <AddToCartButton
           variantId={selected?.id ?? null}
+          outOfStock={!selectedInStock}
           className="px-8 py-3.5"
         />
         <LocalizedLink

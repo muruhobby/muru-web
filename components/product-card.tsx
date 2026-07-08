@@ -4,6 +4,7 @@ import {
   getProductImage,
   getProductMeta,
   getVariantPrice,
+  isVariantInStock,
 } from "@/lib/util";
 import type { StoreProduct } from "@/lib/types";
 import { AddToCartButton } from "./add-to-cart-button";
@@ -25,7 +26,8 @@ export function ProductCard({
   const { badge, categoryLabel, emoji } = getProductMeta(product);
   const price = getVariantPrice(product);
   const image = getProductImage(product);
-  const variantId = product?.variants?.[0]?.id ?? null;
+  const buyable = product?.variants?.find(isVariantInStock) ?? null;
+  const variantId = buyable?.id ?? product?.variants?.[0]?.id ?? null;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
@@ -76,7 +78,7 @@ export function ProductCard({
           <span className="text-lg font-extrabold text-ink">
             {price !== null ? formatIDR(price) : "—"}
           </span>
-          <AddToCartButton variantId={variantId} compact />
+          <AddToCartButton variantId={variantId} outOfStock={!buyable} compact />
         </div>
       </div>
     </div>

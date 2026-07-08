@@ -61,3 +61,27 @@ export async function updateAddress(formData: FormData): Promise<AddressState> {
 export async function deleteAddress(addressId: string): Promise<void> {
   await sdk.store.customer.deleteAddress(addressId);
 }
+
+/**
+ * Best-effort save used by checkout's "save this address to my address book"
+ * checkbox — a failure must never block the order, so it only logs.
+ */
+export async function saveAddressToBook(address: {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  address_1: string;
+  city: string;
+  province: string;
+  postal_code: string;
+}): Promise<void> {
+  try {
+    await sdk.store.customer.createAddress({
+      ...address,
+      address_name: "Address",
+      country_code: "id",
+    });
+  } catch (e: unknown) {
+    console.error("Could not save address to address book:", e);
+  }
+}

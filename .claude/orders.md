@@ -23,8 +23,11 @@ test steps are in `docs/payments-midtrans.md`.
 
 Driven by `components/checkout-client.tsx` on `/checkout`:
 
-1. Saves the address (always `country_code: "id"`) as both shipping and billing, plus the
-   email, onto the cart.
+1. The customer either uses a saved address (one card — the default shipping address —
+   with a "Change" picker over the rest of the address book) or fills the new-address
+   form, whose "save this address to my address book" checkbox is honored best-effort at
+   order submit (`saveAddressToBook`). The chosen address (always `country_code: "id"`)
+   is saved as both shipping and billing, plus the email, onto the cart.
 2. Lists the cart's shipping options. Options from the backend's **Biteship** fulfillment
    provider are `price_type: "calculated"` — each one is priced via the calculate
    endpoint, which asks Biteship for a live JNE / J&T rate for the destination + item

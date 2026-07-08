@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Claude Code local (per-machine) settings
 .claude/settings.local.json
+
+# Local Tokopedia product export (not part of the storefront)
+/tokopedia-muru-export/
